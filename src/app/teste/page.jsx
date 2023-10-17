@@ -2,13 +2,16 @@
 
 import { useContext, useEffect, useState } from "react";
 import { TesteContext, TesteProvider } from "../../../context/TesteContext";
+import { io } from "socket.io-client";
+
+const socket = io("http://localhost:3001");
 
 export default function Home() {
   const { testes, testes0, fetchTeste } = useContext(TesteContext);
   const [carregado, setCarregado] = useState(false);
   const [testes1, setTestes1] = useState(testes0);
 
-  const [maxItens, setMaxItens] = useState(234);
+  const [maxItens, setMaxItens] = useState(15);
 
   const progress =
     testes1.length === 0 ? 100 : (testes1[0].outputs.length / maxItens) * 100; // Defina MAX_ITEMS como o tamanho máximo do array
@@ -53,6 +56,17 @@ export default function Home() {
   useEffect(() => {
     setCarregado(true);
   }, []);
+
+  useEffect(() => {
+    socket.on("modificacao", (data) => {
+      console.log("Modificação recebida:", data);
+    });
+
+    return () => {
+      socket.off("modificacao");
+    };
+  }, []);
+
   return (
     <div className="flex w-full h-full">
       <div className="flex w-screen h-screen bg-blue-400 justify-center items-center">
