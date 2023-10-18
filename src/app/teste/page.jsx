@@ -1,65 +1,74 @@
 "use client";
 
 import { useContext, useEffect, useState } from "react";
-import { TesteContext, TesteProvider } from "../../../context/TesteContext";
+import { TesteContext } from "../../../context/TesteContext";
 import { io } from "socket.io-client";
+import TesteServices from "../../../services/teste";
 
 const socket = io("http://localhost:3001");
 
 export default function Home() {
-  const { testes, testes0, fetchTeste } = useContext(TesteContext);
-  const [carregado, setCarregado] = useState(false);
-  const [testes1, setTestes1] = useState(testes0);
-
+  // const { testes, testes0, fetchTeste, setTestes0 } = useContext(TesteContext);
+  const [testes, setTestes] = useState([]);
   const [maxItens, setMaxItens] = useState(15);
+  const [carregado, setCarregado] = useState(false);
+
+  let teste1 = [];
 
   const progress =
-    testes1.length === 0 ? 100 : (testes1[0].outputs.length / maxItens) * 100; // Defina MAX_ITEMS como o tamanho máximo do array
+    testes.length === 0 ? 100 : (testes[0].outputs.length / maxItens) * 100; // Defina MAX_ITEMS como o tamanho máximo do array
 
-  function teste() {
-    const out = testes0[0].outputs; // Verifica se já atingiu o fim do array
-    console.log(out.length);
-    if (out.length <= 0) {
-      clearInterval(interval); // Para o setInterval
-      return;
+  function teste(data) {
+    console.log(teste1, "teste1 aqui");
+    if (data[0] == 0) {
+      for (let i = 0; i < data[2]; i++) {
+        const indexTira = teste1[0].inputs.indexOf(parseInt(data[i + 3]));
+        console.log(
+          indexTira,
+          teste1[0].inputs,
+          "index do que deve tirar aquyi"
+        );
+        if (indexTira == -1) {
+        } else {
+          teste1[0].outputs.splice(indexTira, 1);
+          teste1[0].outputs_desc.splice(indexTira, 1);
+          teste1[0].inputs.splice(indexTira, 1);
+          teste1[0].inputs_desc.splice(indexTira, 1);
+          console.log(teste1);
+          setTestes([...teste1]);
+          console.log(testes);
+        }
+      }
+    } else if (data[0] == 1) {
+      for (let i = 0; i < data[2]; i++) {
+        const index = parseInt(data[4]);
+
+        setTestes([...teste1]);
+      }
     }
-
-    // Lógica para modificar testes1 de acordo com os dados de testes0
-    const novoTestes1 = [...testes0];
-    const i = novoTestes1[0];
-    i.outputs.shift();
-    i.outputs_desc.shift();
-    i.inputs.shift();
-    i.inputs_desc.shift();
-
-    setTestes1(novoTestes1);
   }
 
-  let interval = null;
-
-  // Chame a função a cada meio segundo
-  function iniciarTeste() {
-    interval = setInterval(teste, 50); // 500 milissegundos = meio segundo
-  }
-
-  function looding() {
-    iniciarTeste();
-  }
-
-  function tes() {
-    setCarregado(true);
-    console.log(testes0);
-    setTestes1(testes0);
-    console.log(testes1);
-  }
+  const fetchDados = async () => {
+    const response = await TesteServices.index();
+    if (response.data.length > 0) {
+      teste1 = response.data;
+      console.log(teste1, "auqi test1");
+      setTestes(teste1);
+    } else {
+      setTestes([]);
+      console.log("aqui dados2");
+    }
+  };
 
   useEffect(() => {
     setCarregado(true);
+    fetchDados();
   }, []);
 
   useEffect(() => {
     socket.on("modificacao", (data) => {
       console.log("Modificação recebida:", data);
+      teste(data);
     });
 
     return () => {
@@ -91,27 +100,34 @@ export default function Home() {
               </div>
               {carregado === true && (
                 <div className="flex w-full overflow-y-auto max-h-full">
-                  {testes1?.map((t, testIndex) => (
+                  {testes?.map((t, testIndex) => (
                     <div className="flex flex-col w-full" key={testIndex}>
                       <h3>CP: {t.product_code}</h3>
                       <div className="flex flex-col w-full">
-                        <div className="grid grid-cols-4">
+                        <div className="grid grid-cols-6">
                           <div className="col-span-2">Saídas: </div>
                           <div className="col-span-2">Entradas: </div>
+                          <div className="col-span-2">Error: </div>
                         </div>
                         {t.outputs_desc.map((d, innerDescIndex) => (
                           <div
                             key={innerDescIndex}
-                            className="grid grid-cols-4"
+                            className={`grid grid-cols-6 ${
+                              innerDescIndex % 2 === 0
+                                ? "bg-slate-200"
+                                : "bg-slate-300"
+                            }`}
                           >
                             <div className="col-span-2 ml-2">
-                              {t.outputs[innerDescIndex]} - {d}
+                              {t.outputs[innerDescIndex]} - {d.desc}
                             </div>
 
                             <div className="col-span-2 ml-2">
-                              {t.inputs[innerDescIndex]} -{" "}
+                              {t.inputs[innerDescIndex]} -
                               {t.inputs_desc[innerDescIndex]}
                             </div>
+
+                            <div className="col-span-2 ml-2">Erros</div>
                           </div>
                         ))}
                       </div>
@@ -121,13 +137,17 @@ export default function Home() {
               )}
               <div className="flex mt-auto">
                 <button
-                  onClick={() => looding()}
+                  onClick={() => {
+                    console.log(testes);
+                  }}
                   className="w-[200px] h-[80px] rounded-md text-2xl bg-red-400 hover:bg-white hover:text-red-400 text-white font-bold border-[2px] border-red-400"
                 >
                   Reprovar cabo
                 </button>
                 <button
-                  onClick={() => tes()}
+                  onClick={() => {
+                    reload();
+                  }}
                   className="w-[200px] h-[80px] rounded-md text-2xl bg-red-400 hover:bg-white hover:text-red-400 text-white font-bold border-[2px] border-red-400"
                 >
                   Testar

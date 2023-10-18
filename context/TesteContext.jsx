@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import React, { createContext, useState, useContext, useEffect } from "react";
 import TesteServices from "../services/teste";
@@ -13,7 +13,7 @@ export const TesteProvider = ({ children }) => {
     const response = await TesteServices.index();
     if (response.data.length > 0) {
       setTestes(response.data);
-      setTestes0([response.data[0]])
+      setTestes0([response.data[0]]);
     } else {
       setTestes([]);
     }
@@ -28,6 +28,7 @@ export const TesteProvider = ({ children }) => {
         testes,
         testes0,
         fetchTestes,
+        setTestes0,
       }}
     >
       {children}
