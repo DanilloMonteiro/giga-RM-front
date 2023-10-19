@@ -13,10 +13,21 @@ export default function Home() {
   const [maxItens, setMaxItens] = useState(15);
   const [carregado, setCarregado] = useState(false);
 
+  const [time, setTime] = useState(new Date());
+
+  const formatCurrentDate = (date) => {
+    const day = date.getDate().toString().padStart(2, "0");
+    const month = (date.getMonth() + 1).toString().padStart(2, "0");
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  };
+
   let teste1 = [];
 
   const progress =
-    testes.length === 0 ? 100 : (testes[0].outputs.length / maxItens) * 100; // Defina MAX_ITEMS como o tamanho máximo do array
+    testes.length === 0
+      ? 100
+      : ((maxItens - testes[0].outputs.length) / maxItens) * 100; // Defina MAX_ITEMS como o tamanho máximo do array
 
   function teste(data) {
     console.log(teste1, "teste1 aqui");
@@ -41,7 +52,9 @@ export default function Home() {
       }
     } else if (data[0] == 1) {
       for (let i = 0; i < data[2]; i++) {
-        const index = parseInt(data[4]);
+        const tes = teste1[0];
+        const objetoEncontrado = tes.outputs.indexOf(data[4]);
+        tes.outputs_desc[objetoEncontrado].error = data[5];
 
         setTestes([...teste1]);
       }
@@ -76,6 +89,16 @@ export default function Home() {
     };
   }, []);
 
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setTime(new Date());
+    }, 1000); // Atualizar a cada segundo (1000 ms)
+
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, []);
+
   return (
     <div className="flex w-full h-full">
       <div className="flex w-screen h-screen bg-blue-400 justify-center items-center">
@@ -87,15 +110,21 @@ export default function Home() {
                   Teste: GIGA
                 </h1>
                 <div className="flex ml-auto w-full h-full bg-slate-300 rounded-lg items-center justify-around p-1">
-                  <span className="text-2xl">Dia: 12/10/2023 </span>
-                  <span className="text-2xl">Horário: 12:34 </span>
+                  <span className="text-2xl">
+                    Dia: {formatCurrentDate(time)}{" "}
+                  </span>
+                  <span className="text-2xl">
+                    {/* Horário: {time.toLocaleTimeString()} */}
+                  </span>
                 </div>
               </div>
               <div className="progress-container">
                 <div className="progress" style={{ width: `${progress}%` }}>
-                  {progress === 100
-                    ? "Aguardando teste"
-                    : `${progress.toFixed(2)}%`}
+                  {progress === 0 && "Aguardando Teste"}
+                  {progress === 100 && "Teste Concluído"}
+                  {progress !== 0 &&
+                    progress !== 100 &&
+                    `${progress.toFixed(2)}%`}
                 </div>
               </div>
               {carregado === true && (
@@ -127,7 +156,9 @@ export default function Home() {
                               {t.inputs_desc[innerDescIndex]}
                             </div>
 
-                            <div className="col-span-2 ml-2">Erros</div>
+                            <div className="col-span-2 ml-2 text-red-400">
+                              {d.error}
+                            </div>
                           </div>
                         ))}
                       </div>
@@ -135,20 +166,20 @@ export default function Home() {
                   ))}
                 </div>
               )}
-              <div className="flex mt-auto">
+              <div className="flex mt-auto gap-10">
                 <button
                   onClick={() => {
                     console.log(testes);
                   }}
-                  className="w-[200px] h-[80px] rounded-md text-2xl bg-red-400 hover:bg-white hover:text-red-400 text-white font-bold border-[2px] border-red-400"
+                  className="w-[150px] h-[80px] rounded-md text-2xl bg-red-400 hover:bg-white hover:text-red-400 text-white font-bold border-[2px] border-red-400"
                 >
-                  Reprovar cabo
+                  Reprovar chicote
                 </button>
                 <button
                   onClick={() => {
                     reload();
                   }}
-                  className="w-[200px] h-[80px] rounded-md text-2xl bg-red-400 hover:bg-white hover:text-red-400 text-white font-bold border-[2px] border-red-400"
+                  className="w-[150px] h-[80px] rounded-md text-2xl bg-red-400 hover:bg-white hover:text-red-400 text-white font-bold border-[2px] border-red-400"
                 >
                   Testar
                 </button>
@@ -158,7 +189,7 @@ export default function Home() {
           <div className="flex flex-col w-2/6 h-full gap-8">
             <div className="flex w-full h-[120px] bg-green-400 items-center p-3 gap-2 rounded-lg">
               <label className="text-3xl font-semibold md:text-lg">
-                Cabos Aprovados:
+                Chicotes Aprovados:
               </label>
               <input
                 className="w-[90px] h-[60px] text-3xl text-center rounded-lg p-5 md:w-[50px] md:text-lg"
@@ -167,7 +198,7 @@ export default function Home() {
             </div>
             <div className="flex w-full h-[120px] bg-red-400 items-center p-3 gap-2 rounded-lg">
               <label className="text-3xl font-semibold md:text-lg">
-                Cabos Reprovados:
+                Chicotes Reprovados:
               </label>
               <input
                 className="w-[90px] h-[60px] text-3xl text-center rounded-lg p-5 md:w-[50px] md:text-lg"

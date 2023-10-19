@@ -12,14 +12,20 @@
   height: 30px;
   background-color: #ccc;
   position: relative;
+  display: flex;
+  justify-content: center; /* Centraliza horizontalmente */
+  align-items: center; /* Centraliza verticalmente */
 }
 
 .progress {
   height: 100%;
   background-color: #0073e6;
-  color: #fff;
+  color: #000000;
+  font-weight: bold;
   display: flex;
-  justify-content: center;
-  align-items: center;
+  position: relative;
+  justify-content: center; /* Centraliza horizontalmente */
+  align-items: center; /* Centraliza verticalmente */
+  white-space: nowrap; /* Evita quebra de linha */
   transition: width 0.5s;
 }
