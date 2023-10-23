@@ -8,8 +8,8 @@ import TesteServices from "../../../services/teste";
 const socket = io("http://localhost:3001");
 
 export default function Home() {
-  // const { testes, testes0, fetchTeste, setTestes0 } = useContext(TesteContext);
-  const [testes, setTestes] = useState([]);
+  const { testes0, fetchTeste, setTestes0, testes } = useContext(TesteContext);
+  const [testes2, setTestes] = useState([]);
   const [maxItens, setMaxItens] = useState(15);
   const [carregado, setCarregado] = useState(false);
 
@@ -24,10 +24,10 @@ export default function Home() {
 
   let teste1 = [];
 
-  const progress =
-    testes.length === 0
-      ? 100
-      : ((maxItens - testes[0].outputs.length) / maxItens) * 100; // Defina MAX_ITEMS como o tamanho máximo do array
+  // const progress =
+  //   testes.length === 0
+  //     ? 100
+  //     : ((maxItens - testes[0].outputs.length) / maxItens) * 100; // Defina MAX_ITEMS como o tamanho máximo do array
 
   function teste(data) {
     console.log(teste1, "teste1 aqui");
@@ -47,7 +47,7 @@ export default function Home() {
           teste1[0].inputs_desc.splice(indexTira, 1);
           console.log(teste1);
           setTestes([...teste1]);
-          console.log(testes);
+          console.log(testes2);
         }
       }
     } else if (data[0] == 1) {
@@ -62,11 +62,11 @@ export default function Home() {
   }
 
   const fetchDados = async () => {
-    const response = await TesteServices.index();
-    if (response.data.length > 0) {
-      teste1 = response.data;
+    const response = await TesteServices.find(testes);
+    if (response.data.status == "ok") {
+      teste1 = response.data.teste;
       console.log(teste1, "auqi test1");
-      setTestes(teste1);
+      setTestes([teste1]);
     } else {
       setTestes([]);
       console.log("aqui dados2");
@@ -76,7 +76,7 @@ export default function Home() {
   useEffect(() => {
     setCarregado(true);
     fetchDados();
-  }, []);
+  }, [testes]);
 
   useEffect(() => {
     socket.on("modificacao", (data) => {
@@ -99,6 +99,10 @@ export default function Home() {
     };
   }, []);
 
+  useEffect(() => {
+    console.log(testes0, "tesssteee codeeeeeeeasddddddddddddddddddddddd2");
+  }, [testes0]);
+
   return (
     <div className="flex w-full h-full">
       <div className="flex w-screen h-screen bg-blue-400 justify-center items-center">
@@ -118,7 +122,7 @@ export default function Home() {
                   </span>
                 </div>
               </div>
-              <div className="progress-container">
+              {/* <div className="progress-container">
                 <div className="progress" style={{ width: `${progress}%` }}>
                   {progress === 0 && "Aguardando Teste"}
                   {progress === 100 && "Teste Concluído"}
@@ -126,10 +130,10 @@ export default function Home() {
                     progress !== 100 &&
                     `${progress.toFixed(2)}%`}
                 </div>
-              </div>
+              </div> */}
               {carregado === true && (
                 <div className="flex w-full overflow-y-auto max-h-full">
-                  {testes?.map((t, testIndex) => (
+                  {testes2?.map((t, testIndex) => (
                     <div className="flex flex-col w-full" key={testIndex}>
                       <h3>CP: {t.product_code}</h3>
                       <div className="flex flex-col w-full">
