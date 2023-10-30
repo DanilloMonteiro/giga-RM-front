@@ -4,21 +4,39 @@ import { useEffect, useState } from "react";
 import { io } from "socket.io-client";
 import TesteServices from "../../../services/teste";
 import Image from "next/image";
+import { CheckCircle } from "@phosphor-icons/react/dist/ssr/CheckCircle";
+import { WarningCircle } from "@phosphor-icons/react/dist/ssr/WarningCircle";
 
 const socket = io("http://localhost:3001");
 
 export default function Home() {
-  const [search, setSearch] = useState("");
+  const [reprovados, setReprovados] = useState(0);
+  const [aprovados, setAprovados] = useState(0);
   const [teste, setTeste] = useState([]);
-  const [maxItens, setMaxItens] = useState(7);
+  const [testeCopia, setTesteCopia] = useState([]);
+  const [maxItens, setMaxItens] = useState(0);
   const [carregado, setCarregado] = useState(false);
   const [time, setTime] = useState(new Date());
+
+  const [search, setSearch] = useState("");
+  const [searchError, setSearchError] = useState(false);
+
+  const [RE, setRE] = useState("");
+  const [REError, setREError] = useState(false);
+
+  const [reprovado, setReprovado] = useState(false);
+  const [aprovado, setAprovado] = useState(false);
 
   let teste1 = [];
   let teste2 = [];
 
   const handleChangeTeste = (teste) => {
     setSearch(teste);
+  };
+
+  const handleChangeRE = (RE) => {
+    setRE(RE);
+    setREError(false);
   };
 
   const formatCurrentDate = (date) => {
@@ -28,15 +46,84 @@ export default function Home() {
     return `${day}/${month}/${year}`;
   };
 
-  async function fetchTesteAtual(testeCode) {
+  async function startTeste() {
     try {
+      const response = await TesteServices.start();
+    } catch (error) {
+      console.error("Erro ao iniciar teste:", error);
+      setCarregado(false); // Define carregado como false em caso de erro
+    }
+  }
+
+  async function stopTeste() {
+    try {
+      const response = await TesteServices.stop();
+    } catch (error) {
+      console.error("Erro ao iniciar teste:", error);
+      setCarregado(false); // Define carregado como false em caso de erro
+    }
+  }
+
+  const incrementReprovados = () => {
+    setReprovados(reprovados + 1);
+  };
+
+  const incrementAprovados = () => {
+    setAprovados(aprovados + 1);
+  };
+
+  async function Reprovar() {
+    try {
+      incrementReprovados();
+      setTeste(...[testeCopia]);
+
+      const response = await TesteServices.reprove();
+
+      setReprovado(true);
+      setTimeout(() => {
+        setReprovado(false);
+      }, 3000);
+    } catch (error) {
+      console.error("Erro ao iniciar teste:", error);
+      // Define carregado como false em caso de erro
+    }
+  }
+
+  async function Aprovar() {
+    try {
+      incrementAprovados();
+      setTeste(...[testeCopia]);
+
+      const response = await TesteServices.aprove();
+
+      setAprovado(true);
+      setTimeout(() => {
+        setAprovado(false);
+      }, 3000);
+    } catch (error) {
+      console.error("Erro ao iniciar teste:", error);
+      // Define carregado como false em caso de erro
+    }
+  }
+
+  async function fetchTesteAtual(testeCode, re) {
+    try {
+      if (re == "") {
+        setREError(true);
+        return;
+      }
       const response = await TesteServices.find(testeCode);
       if (response.data.status === "ok") {
         teste1 = [response.data.teste];
+        setTesteCopia(...[teste1]);
         setTeste(...[teste1]);
 
+        setMaxItens(teste1[0].outputs.length);
+        console.log("tamanho aqui", teste1[0].outputs.length);
         setCarregado(true); // Define carregado como true para exibir os dados
+        setSearchError(false);
       } else {
+        setSearchError(true);
         setCarregado(false); // Define carregado como false em caso de erro
       }
     } catch (error) {
@@ -52,90 +139,94 @@ export default function Home() {
 
   function TesteFunction(data) {
     console.log(data);
-    if (data[0] == 1) {
-      let datatama = data.length;
-      setTeste((prevTeste) => {
-        const newTeste = { ...prevTeste[0] }; // Clone o objeto teste[0]
-        const objetoEncontrado = newTeste.outputs.indexOf(data[datatama - 2]);
-        if (objetoEncontrado != -1) {
-          console.log(objetoEncontrado, newTeste, data);
-          newTeste.outputs_desc[objetoEncontrado].error = data[datatama - 1];
-          return [newTeste];
-        } else {
-          return [newTeste];
-        }
-      });
-    } else if (data[0] == 0) {
-      // for (let i = 1; i < data.length; i++) {
-      const indexTira = teste[0].inputs.indexOf(parseInt(data[1]));
-      if (indexTira != -1) {
+    if (teste != []) {
+      if (data[0] == 1) {
+        let datatama = data.length;
         setTeste((prevTeste) => {
           const newTeste = { ...prevTeste[0] }; // Clone o objeto teste[0]
-
-          // Use o método filter para criar novos arrays que excluem o elemento específico
-          newTeste.outputs = newTeste.outputs.filter(
-            (element, i) => i !== indexTira
-          );
-          newTeste.outputs_desc = newTeste.outputs_desc.filter(
-            (element, i) => i !== indexTira
-          );
-          newTeste.inputs = newTeste.inputs.filter(
-            (element, i) => i !== indexTira
-          );
-          newTeste.inputs_desc = newTeste.inputs_desc.filter(
-            (element, i) => i !== indexTira
-          );
-
-          return [newTeste];
+          const objetoEncontrado = newTeste.outputs.indexOf(data[datatama - 2]);
+          if (objetoEncontrado != -1) {
+            console.log(objetoEncontrado, newTeste, data);
+            newTeste.outputs_desc[objetoEncontrado].error = data[datatama - 1];
+            return [newTeste];
+          } else {
+            return [newTeste];
+          }
         });
-      } else {
-        // Atualize o estado do 'teste' usando setTeste
-        return;
-      }
-      // }
-    } else if (data[0] == 2) {
-      let datatama = data.length;
-      setTeste((prevTeste) => {
-        const newTeste = { ...prevTeste[0] }; // Clone o objeto teste[0]
-        const objetoEncontrado = newTeste.outputs.indexOf(data[1]);
-        console.log(objetoEncontrado, newTeste, data);
+      } else if (data[0] == 0) {
+        // for (let i = 1; i < data.length; i++) {
+        const indexTira = teste[0].inputs.indexOf(parseInt(data[1]));
+        if (indexTira != -1) {
+          setTeste((prevTeste) => {
+            const newTeste = { ...prevTeste[0] }; // Clone o objeto teste[0]
 
-        if (objetoEncontrado != -1) {
-          newTeste.outputs_desc[objetoEncontrado].error = "";
-          return [newTeste];
+            // Use o método filter para criar novos arrays que excluem o elemento específico
+            newTeste.outputs = newTeste.outputs.filter(
+              (element, i) => i !== indexTira
+            );
+            newTeste.outputs_desc = newTeste.outputs_desc.filter(
+              (element, i) => i !== indexTira
+            );
+            newTeste.inputs = newTeste.inputs.filter(
+              (element, i) => i !== indexTira
+            );
+            newTeste.inputs_desc = newTeste.inputs_desc.filter(
+              (element, i) => i !== indexTira
+            );
+
+            return [newTeste];
+          });
         } else {
-          return [newTeste];
+          // Atualize o estado do 'teste' usando setTeste
+          return;
         }
-      });
-    } else if (data[0] == 4) {
-      console.log("data0 e 4");
-      let datatama = data.length;
-      setTeste((prevTeste) => {
-        const newTeste = { ...prevTeste[0] }; // Clone o objeto teste[0]
-        const objetoEncontrado = newTeste.inputs.indexOf(data[datatama - 2]);
-        console.log("objeto encontrado index", objetoEncontrado);
-        if (objetoEncontrado != -1) {
+        // }
+      } else if (data[0] == 2) {
+        let datatama = data.length;
+        setTeste((prevTeste) => {
+          const newTeste = { ...prevTeste[0] }; // Clone o objeto teste[0]
+          const objetoEncontrado = newTeste.outputs.indexOf(data[1]);
           console.log(objetoEncontrado, newTeste, data);
-          newTeste.outputs_desc[objetoEncontrado].error = data[datatama - 1];
-          return [newTeste];
-        } else {
-          return [newTeste];
-        }
-      });
-    } else if (data[0] == 3) {
-      let datatama = data.length;
-      setTeste((prevTeste) => {
-        const newTeste = { ...prevTeste[0] }; // Clone o objeto teste[0]
-        const objetoEncontrado = newTeste.inputs.indexOf(data[2]);
-        console.log(objetoEncontrado, newTeste, data);
-        if (objetoEncontrado != -1) {
+
+          if (objetoEncontrado != -1) {
+            newTeste.outputs_desc[objetoEncontrado].error = "";
+            return [newTeste];
+          } else {
+            return [newTeste];
+          }
+        });
+      } else if (data[0] == 4) {
+        console.log("data0 e 4");
+        let datatama = data.length;
+        setTeste((prevTeste) => {
+          const newTeste = { ...prevTeste[0] }; // Clone o objeto teste[0]
+          const objetoEncontrado = newTeste.inputs.indexOf(data[datatama - 2]);
+          console.log("objeto encontrado index", objetoEncontrado);
+          if (objetoEncontrado != -1) {
+            console.log(objetoEncontrado, newTeste, data);
+            newTeste.outputs_desc[objetoEncontrado].error = data[datatama - 1];
+            return [newTeste];
+          } else {
+            return [newTeste];
+          }
+        });
+      } else if (data[0] == 3) {
+        let datatama = data.length;
+        setTeste((prevTeste) => {
+          const newTeste = { ...prevTeste[0] }; // Clone o objeto teste[0]
+          const objetoEncontrado = newTeste.inputs.indexOf(data[2]);
           console.log(objetoEncontrado, newTeste, data);
-          newTeste.outputs_desc[objetoEncontrado].error = "";
-          return [newTeste];
-        } else {
-          return [newTeste];
-        }
-      });
+          if (objetoEncontrado != -1) {
+            console.log(objetoEncontrado, newTeste, data);
+            newTeste.outputs_desc[objetoEncontrado].error = "";
+            return [newTeste];
+          } else {
+            return [newTeste];
+          }
+        });
+      }
+    } else {
+      Reprovar();
     }
   }
 
@@ -163,6 +254,7 @@ export default function Home() {
   }, [teste]);
 
   useEffect(() => {
+    stopTeste();
     const intervalId = setInterval(() => {
       setTime(new Date());
     }, 1000); // Atualizar a cada segundo (1000 ms)
@@ -175,7 +267,7 @@ export default function Home() {
   return (
     <div className="flex w-full h-full">
       <div className="flex w-screen h-screen bg-blue-400 justify-center items-center">
-        <div className="flex w-[90vw] h-[90vh] gap-10 bg-white rounded-xl drop-shadow-lg p-7">
+        <div className="flex static w-[90vw] h-[90vh] gap-10 bg-white rounded-xl drop-shadow-lg p-7">
           {carregado === false && (
             <>
               <div className="flex flex-col w-full  h-full bg-white items-center rounded-md">
@@ -185,20 +277,29 @@ export default function Home() {
                   width={300} // Largura da imagem (ajuste conforme necessário)
                   height={300} // Altura da imagem (ajuste conforme necessário)
                 />
-                <div className="flex flex-col w-[600px] gap-10 bg-slate-300 px-20 pb-20">
+                <div className="flex flex-col w-[600px] bg-slate-300 px-20 pb-20">
                   <div className="flex items-center mt-10 justify-between">
-                    <label className="flex bg-slate-400 text-white font-semibold w-[200px] h-[40px] border-[2px] justify-center items-center  border-slate-400 rounded-sm">
+                    <label className="flex bg-slate-400 text-white font-semibold w-[200px] h-[40px] border-[2px] justify-center items-center border-slate-400 rounded-sm">
                       RE:
                     </label>
                     <input
                       className="border-[1px] rounded-sm p-2"
                       placeholder="Digite o RE"
-                      onChange={(e) => handleChangeTeste(e.target.value)}
+                      onChange={(e) => handleChangeRE(e.target.value)}
                     ></input>
                   </div>
-                  <div className="flex items-center justify-between">
+                  <div className="flex">
+                    {REError && (
+                      <span className="w-full h-4 text-red-500 ml-3">
+                        Esse campo é obrigatorio*
+                      </span>
+                    )}
+
+                    <span className="w-full h-4 text-red-500"></span>
+                  </div>
+                  <div className="flex items-center mt-6 justify-between">
                     <button
-                      onClick={() => fetchTesteAtual(search)}
+                      onClick={() => fetchTesteAtual(search, RE)}
                       className="bg-blue-400 text-white font-semibold w-[200px] h-[40px] border-[2px] border-blue-400 rounded-sm hover:text-blue-400 hover:bg-white"
                     >
                       Iniciar Teste
@@ -209,8 +310,17 @@ export default function Home() {
                       onChange={(e) => handleChangeTeste(e.target.value)}
                     ></input>
                   </div>
+                  <div className="flex">
+                    {searchError && (
+                      <span className="w-full h-4 text-red-500 ml-3">
+                        Teste não encontrado*
+                      </span>
+                    )}
 
-                  <div className="flexjustify-start">
+                    <span className="w-full h-4 text-red-500"></span>
+                  </div>
+
+                  <div className="flexjustify-start mt-6">
                     <button className="bg-blue-400 text-white font-semibold w-[200px] h-[70px] rounded-sm border-[2px] border-blue-400 hover:text-blue-400 hover:bg-white">
                       Continuar com teste anterior
                     </button>
@@ -222,11 +332,11 @@ export default function Home() {
 
           {carregado == true && (
             <>
-              <div className="flex flex-col w-4/6 h-full">
+              <div className="flex flex-col w-3/6 h-full">
                 <div className="flex flex-col w-full h-full bg-slate-400 gap-2 pt-10 p-2 rounded-2xl">
                   <div className="flex flex-col w-full h-auto gap-4 mb-4">
-                    <h1 className="text-5xl font-bold bg-slate-300 rounded-lg p-2">
-                      Teste: GIGA
+                    <h1 className="text-4xl font-bold bg-slate-300 rounded-lg p-2">
+                      Teste: {teste[0].product_code}
                     </h1>
                     <div className="flex ml-auto w-full h-full bg-slate-300 rounded-lg items-center justify-around p-1">
                       <span className="text-2xl">
@@ -240,7 +350,7 @@ export default function Home() {
                   <div className="progress-container">
                     <div className="progress" style={{ width: `${progress}%` }}>
                       {progress === 0 && "Aguardando Teste"}
-                      {progress === 100 && "Teste Concluído"}
+                      {progress === 100 && "Teste Concluído" && Aprovar()}
                       {progress !== 0 &&
                         progress !== 100 &&
                         `${progress.toFixed(2)}%`}
@@ -295,47 +405,138 @@ export default function Home() {
                           </button>
                         </>
                       )}
-                      {}
                     </div>
                   )}
                   <div className="flex mt-auto gap-10">
                     <button
                       onClick={() => {
-                        TesteFunction([0, 1, 1, 25]);
+                        Reprovar();
                       }}
                       className="w-[150px] h-[80px] rounded-md text-2xl bg-red-400 hover:bg-white hover:text-red-400 text-white font-bold border-[2px] border-red-400"
                     >
                       Reprovar chicote
                     </button>
-                    <button className="w-[150px] h-[80px] rounded-md text-2xl bg-red-400 hover:bg-white hover:text-red-400 text-white font-bold border-[2px] border-red-400">
+                    <button
+                      onClick={() => {
+                        startTeste();
+                      }}
+                      className="w-[150px] h-[80px] rounded-md text-2xl bg-red-400 hover:bg-white hover:text-red-400 text-white font-bold border-[2px] border-red-400"
+                    >
                       Testar
                     </button>
                   </div>
                 </div>
               </div>
-              <div className="flex flex-col w-2/6 h-full gap-8">
+              <div className="flex flex-col w-3/6 h-full gap-8">
                 <div className="flex w-full h-[120px] bg-green-400 items-center p-3 gap-2 rounded-lg">
                   <label className="text-3xl font-semibold md:text-lg">
                     Chicotes Aprovados:
                   </label>
-                  <input
-                    className="w-[90px] h-[60px] text-3xl text-center rounded-lg p-5 md:w-[50px] md:text-lg"
-                    placeholder="0"
-                  ></input>
+                  <label className="w-[90px] h-[60px] text-3xl text-center bg-slate-100 rounded-lg p-5 md:w-[50px] md:text-lg">
+                    {aprovados}
+                  </label>
                 </div>
                 <div className="flex w-full h-[120px] bg-red-400 items-center p-3 gap-2 rounded-lg">
                   <label className="text-3xl font-semibold md:text-lg">
                     Chicotes Reprovados:
                   </label>
-                  <input
-                    className="w-[90px] h-[60px] text-3xl text-center rounded-lg p-5 md:w-[50px] md:text-lg"
-                    placeholder="0"
-                  ></input>
+                  <label className="w-[90px] h-[60px] text-3xl text-center bg-slate-100 rounded-lg p-5 md:w-[50px] md:text-lg">
+                    {reprovados}
+                  </label>
                 </div>
-                <div className="flex w-full h-full justify-center items-center bg-slate-200">
-                  <h1 className="text-5xl">IMAGE</h1>
+                <div className="flex flex-col w-full h-full justify-center items-center bg-slate-200">
+                  <div className="w-full h-2/4 bg-white">
+                    <div className="flex w-full h-full justify-center items-start bg-slate-200">
+                      <div className="w-full h-full bg-white border-[1px] border-slate-400 rounded-md">
+                        <div className="grid grid-cols-8 grid-rows-8 gap-2 h-full p-2">
+                          <div className="bg-white"></div>
+                          <div className="bg-slate-200 text-center">1</div>
+                          <div className="bg-slate-200 text-center">2</div>
+                          <div className="bg-slate-200 text-center">3</div>
+                          <div className="bg-slate-200 text-center">4</div>
+                          <div className="bg-slate-200 text-center">5</div>
+                          <div className="bg-slate-200 text-center">6</div>
+                          <div className="bg-slate-200 text-center">7</div>
+
+                          <div className="bg-slate-200 text-center">A - B</div>
+                          <div className="bg-yellow-200"></div>
+                          <div className="bg-slate-200"></div>
+                          <div className="bg-slate-200"></div>
+                          <div className="bg-slate-200"></div>
+                          <div className="bg-slate-200"></div>
+                          <div className="bg-slate-200"></div>
+                          <div className="bg-slate-200"></div>
+
+                          <div className="bg-slate-200 text-center">E - F</div>
+                          <div className="bg-slate-200"></div>
+                          <div className="bg-slate-200"></div>
+                          <div className="bg-slate-200"></div>
+                          <div className="bg-slate-200"></div>
+                          <div className="bg-slate-200"></div>
+                          <div className="bg-slate-200"></div>
+                          <div className="bg-slate-200"></div>
+
+                          <div className="bg-slate-200 text-center">G - H</div>
+                          <div className="bg-slate-200"></div>
+                          <div className="bg-slate-200"></div>
+                          <div className="bg-slate-200"></div>
+                          <div className="bg-slate-200"></div>
+                          <div className="bg-slate-200"></div>
+                          <div className="bg-slate-200"></div>
+                          <div className="bg-slate-200"></div>
+
+                          <div className="bg-slate-200 text-center">I - J</div>
+                          <div className="bg-slate-200"></div>
+                          <div className="bg-slate-200"></div>
+                          <div className="bg-slate-200"></div>
+                          <div className="bg-slate-200"></div>
+                          <div className="bg-slate-200"></div>
+                          <div className="bg-slate-200"></div>
+                          <div className="bg-slate-200"></div>
+
+                          <div className="bg-slate-200 text-center">K - L</div>
+                          <div className="bg-slate-200"></div>
+                          <div className="bg-slate-200"></div>
+                          <div className="bg-slate-200"></div>
+                          <div className="bg-slate-200"></div>
+                          <div className="bg-slate-200"></div>
+                          <div className="bg-slate-200"></div>
+                          <div className="bg-slate-200"></div>
+
+                          <div className="bg-slate-200 text-center">M - N</div>
+                          <div className="bg-slate-200"></div>
+                          <div className="bg-slate-200"></div>
+                          <div className="bg-slate-200"></div>
+                          <div className="bg-slate-200"></div>
+                          <div className="bg-slate-200"></div>
+                          <div className="bg-slate-200"></div>
+                          <div className="bg-slate-200"></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex w-full h-2/4 bg-white">
+                    <div className="flex w-1/2 h-full justify-center items-center border-[1px] border-slate-400 rounded-md">
+                      <h1>Imagem do conector</h1>
+                    </div>
+                    <div className="flex w-1/2 h-full justify-center items-center border-[1px] border-slate-400 rounded-md">
+                      <h1>Imagem do conector</h1>
+                    </div>
+                  </div>
                 </div>
               </div>
+              {aprovado == true && (
+                <div className="flex flex-col items-center justify-center absolute w-full h-full bg-green-500 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-xl">
+                  <CheckCircle size={300} className="text-white" />
+                  <h1 className="text-white text-9xl">Cabo Aprovado</h1>
+                </div>
+              )}
+              {reprovado == true && (
+                <div className="flex flex-col items-center justify-center absolute w-full h-full bg-red-500 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-xl">
+                  <WarningCircle size={300} className="text-white" />
+                  <h1 className="text-white text-9xl">Cabo Reprovado</h1>
+                </div>
+              )}
             </>
           )}
         </div>
