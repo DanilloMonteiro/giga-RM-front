@@ -6,6 +6,8 @@ import TesteServices from "../../../services/teste";
 import Image from "next/image";
 import { CheckCircle } from "@phosphor-icons/react/dist/ssr/CheckCircle";
 import { WarningCircle } from "@phosphor-icons/react/dist/ssr/WarningCircle";
+import { X } from "@phosphor-icons/react/dist/ssr/X";
+import Link from "next/link";
 
 const socket = io("http://localhost:3001");
 
@@ -18,6 +20,8 @@ export default function Home() {
   const [carregado, setCarregado] = useState(false);
   const [time, setTime] = useState(new Date());
 
+  const [testePontos, setTestePontos] = useState(false);
+
   const [search, setSearch] = useState("");
   const [searchError, setSearchError] = useState(false);
 
@@ -26,6 +30,10 @@ export default function Home() {
 
   const [reprovado, setReprovado] = useState(false);
   const [aprovado, setAprovado] = useState(false);
+
+  const [testeGIGA, setTesteGIGA] = useState([]);
+  const [testeGIGACopia, setTesteGIGACopia] = useState([]);
+  const [maxItensGIGA, setMaxItensGIGA] = useState(256);
 
   let teste1 = [];
   let teste2 = [];
@@ -132,28 +140,46 @@ export default function Home() {
     }
     console.log(teste1, teste2);
   }
+
+  async function fetchTesteAtualGIGA(testeCode, re) {
+    try {
+      if (re == "") {
+        setREError(true);
+        return;
+      }
+      const response = await TesteServices.find(`Teste 4 placas`);
+      if (response.data.status === "ok") {
+        teste1 = [response.data.teste];
+
+        setTesteGIGACopia(...[teste1]);
+        setTesteGIGA(...[teste1]);
+
+        setMaxItensGIGA(teste1[0].outputs.length);
+        setTestePontos(true);
+        console.log("tamanho aqui", teste1[0].outputs.length);
+      } else {
+        setTestePontos(false); // Define setTestePontos como false em caso de erro
+      }
+    } catch (error) {
+      console.error("Erro ao buscar dados do teste:", error);
+      setTestePontos(false); // Define TestePontos como false em caso de erro
+    }
+  }
+
   const progress =
     teste.length === 0
       ? 100
       : ((maxItens - teste[0].outputs.length) / maxItens) * 100; // Defina MAX_ITEMS como o tamanho máximo do array
 
+  const progress1 =
+    teste.length === 0
+      ? 100
+      : ((maxItens - teste[0].outputs.length) / maxItensGIGA) * 100; // Defina MAX_ITEMS como o tamanho máximo do array
+
   function TesteFunction(data) {
     console.log(data);
     if (teste != []) {
-      if (data[0] == 1) {
-        let datatama = data.length;
-        setTeste((prevTeste) => {
-          const newTeste = { ...prevTeste[0] }; // Clone o objeto teste[0]
-          const objetoEncontrado = newTeste.outputs.indexOf(data[datatama - 2]);
-          if (objetoEncontrado != -1) {
-            console.log(objetoEncontrado, newTeste, data);
-            newTeste.outputs_desc[objetoEncontrado].error = data[datatama - 1];
-            return [newTeste];
-          } else {
-            return [newTeste];
-          }
-        });
-      } else if (data[0] == 0) {
+      if (data[0] == 0) {
         // for (let i = 1; i < data.length; i++) {
         const indexTira = teste[0].inputs.indexOf(parseInt(data[1]));
         if (indexTira != -1) {
@@ -181,12 +207,24 @@ export default function Home() {
           return;
         }
         // }
-      } else if (data[0] == 2) {
+      } else if (data[0] == 1) {
         let datatama = data.length;
         setTeste((prevTeste) => {
           const newTeste = { ...prevTeste[0] }; // Clone o objeto teste[0]
-          const objetoEncontrado = newTeste.outputs.indexOf(data[1]);
-          console.log(objetoEncontrado, newTeste, data);
+          const objetoEncontrado = newTeste.inputs.indexOf(data[datatama - 2]);
+          if (objetoEncontrado != -1) {
+            newTeste.outputs_desc[objetoEncontrado].error = data[datatama - 1];
+            return [newTeste];
+          } else {
+            return [newTeste];
+          }
+        });
+      } else if (data[0] == 2) {
+        // limpa a tela cabo desconectado
+        let datatama = data.length;
+        setTeste((prevTeste) => {
+          const newTeste = { ...prevTeste[0] }; // Clone o objeto teste[0]
+          const objetoEncontrado = newTeste.inputs.indexOf(data[1]);
 
           if (objetoEncontrado != -1) {
             newTeste.outputs_desc[objetoEncontrado].error = "";
@@ -195,29 +233,14 @@ export default function Home() {
             return [newTeste];
           }
         });
-      } else if (data[0] == 4) {
-        console.log("data0 e 4");
-        let datatama = data.length;
-        setTeste((prevTeste) => {
-          const newTeste = { ...prevTeste[0] }; // Clone o objeto teste[0]
-          const objetoEncontrado = newTeste.inputs.indexOf(data[datatama - 2]);
-          console.log("objeto encontrado index", objetoEncontrado);
-          if (objetoEncontrado != -1) {
-            console.log(objetoEncontrado, newTeste, data);
-            newTeste.outputs_desc[objetoEncontrado].error = data[datatama - 1];
-            return [newTeste];
-          } else {
-            return [newTeste];
-          }
-        });
       } else if (data[0] == 3) {
+        // testeGIGA
         let datatama = data.length;
         setTeste((prevTeste) => {
           const newTeste = { ...prevTeste[0] }; // Clone o objeto teste[0]
           const objetoEncontrado = newTeste.inputs.indexOf(data[2]);
-          console.log(objetoEncontrado, newTeste, data);
+
           if (objetoEncontrado != -1) {
-            console.log(objetoEncontrado, newTeste, data);
             newTeste.outputs_desc[objetoEncontrado].error = "";
             return [newTeste];
           } else {
@@ -226,21 +249,8 @@ export default function Home() {
         });
       }
     } else {
-      Reprovar();
     }
   }
-
-  // const fetchDados = async () => {
-  //   const response = await TesteServices.find(testes);
-  //   if (response.data.status == "ok") {
-  //     teste1 = response.data.teste;
-  //     console.log(teste1, "auqi test1");
-  //     setTestes([teste1]);
-  //   } else {
-  //     setTestes([]);
-  //     console.log("aqui dados2");
-  //   }
-  // };
 
   useEffect(() => {
     socket.on("modificacao", (data) => {
@@ -321,8 +331,8 @@ export default function Home() {
                   </div>
 
                   <div className="flexjustify-start mt-6">
-                    <button className="bg-blue-400 text-white font-semibold w-[200px] h-[70px] rounded-sm border-[2px] border-blue-400 hover:text-blue-400 hover:bg-white">
-                      Continuar com teste anterior
+                    <button className="bg-blue-400 text-white font-semibold w-[200px] h-[40px] rounded-sm border-[2px] border-blue-400 hover:text-blue-400 hover:bg-white">
+                      <Link href={`/create/test`}>Criar Teste GIGA</Link>
                     </button>
                   </div>
                 </div>
@@ -423,6 +433,14 @@ export default function Home() {
                       className="w-[150px] h-[80px] rounded-md text-2xl bg-red-400 hover:bg-white hover:text-red-400 text-white font-bold border-[2px] border-red-400"
                     >
                       Testar
+                    </button>
+                    <button
+                      onClick={() => {
+                        fetchTesteAtualGIGA();
+                      }}
+                      className="w-[150px] h-[80px] rounded-md text-2xl bg-green-400 hover:bg-white hover:text-green-400 text-white font-bold border-[2px] border-green-400"
+                    >
+                      Teste de pontos
                     </button>
                   </div>
                 </div>
@@ -541,6 +559,34 @@ export default function Home() {
           )}
         </div>
       </div>
+      {testePontos && (
+        <div className="flex absolute bg-slate-500 w-full h-full top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-xl opacity-50"></div>
+      )}
+      {testePontos && (
+        <div className="flex flex-col absolute bg-white w-4/6 h-4/6 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-xl py-3 px-5">
+          <div className="flex w-full h-auto">
+            <h1 className="text-5xl font-semibold ">Teste de Pontos</h1>
+            <X
+              size={50}
+              weight="bold"
+              className="ml-auto text-black bg-slate-300 rounded-md hover:bg-slate-600 hover:text-white"
+              onClick={() => {
+                setTestePontos(false);
+              }}
+            />
+          </div>
+
+          <div className="flex flex-co py-5">
+            <div className="progress-container1">
+              <div className="progress" style={{ width: `${progress1}%` }}>
+                {progress1 === 0 && "Aguardando Teste"}
+                {progress1 === 100 && "Teste Concluído"}
+                {progress1 !== 0 && progress1 !== 100}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

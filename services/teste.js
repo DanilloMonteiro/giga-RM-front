@@ -7,6 +7,7 @@ const TesteServices = {
   stop: () => Api.get("/stop"),
   reprove: () => Api.get("/reprove"),
   aprove: () => Api.get("/aprove"),
+  gigaFind: () => Api.get("/GIGA"),
 };
 
 export default TesteServices;
