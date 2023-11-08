@@ -8,6 +8,8 @@ export default function Home() {
   const [codigoTEST, setCodigoTEST] = useState(false);
   const [newGIGA, setNewGIGA] = useState(false);
   const [menu, setMenu] = useState(true);
+  const [GIGASearch, setGIGASearch] = useState("");
+  const [GIGAData, setGIGAData] = useState([]);
 
   const openCreateGIGA = () => {
     setMenu(false);
@@ -19,10 +21,13 @@ export default function Home() {
     setCodigoTEST(true);
   };
 
-  async function fetchTesteAtual() {
+  async function fetchGIGAAtual(search) {
     try {
-      const response = await TesteServices.gigaFind();
+      const response = await TesteServices.gigaFind({ name: search });
       if (response.data.status === "ok") {
+        const giga1 = [response.data.giga];
+
+        setGIGAData(...[giga1]);
       } else {
       }
     } catch (error) {
@@ -81,10 +86,21 @@ export default function Home() {
                     <h1 className="w-1/6 h-auto text-xl align-middle pt-1">
                       Qual GIGA deseja modificar?
                     </h1>
-                    <input
-                      className="w-2/6 border-[1px] border-slate-400 rounded-md"
-                      onChange={() => {}}
-                    ></input>
+                    <div className="flex w-2/6  rounded-md">
+                      <input
+                        className="w-full h-full rounded-l-md border-[1px] border-slate-400"
+                        onChange={(e) => {}}
+                      ></input>
+                      <button
+                        onClick={() => {
+                          fetchGIGAAtual(GIGASearch);
+                        }}
+                        className="ml-auto px-3 bg-blue-400 text-xl font-semibold rounded-r-md text-white hover:bg-white hover:text-blue-400 border-[1px] border-blue-400"
+                      >
+                        Procurar
+                      </button>
+                    </div>
+
                     <span className=" h-auto text-xl align-middle pt-1">
                       OU
                     </span>
@@ -103,68 +119,76 @@ export default function Home() {
                     <h1 className="w-full text-xl">GIGA atual: GIGA 1</h1>
                   </div>
                   <div className="">
-                    <table className="table-auto">
-                      <thead>
-                        <tr className="bg-slate-300 h-[40px] text-center ">
-                          <th className="w-[200px] border-x-[1px] border-slate-400">
-                            Holder
-                          </th>
-                          <th className="w-[200px] border-x-[1px] border-slate-400">
-                            Descrição
-                          </th>
-                          <th className="w-[200px] border-x-[1px] border-slate-400">
-                            X
-                          </th>
-                          <th className="w-[200px] border-x-[1px] border-slate-400">
-                            Y
-                          </th>
-                          <th className="w-[200px] border-x-[1px] border-slate-400">
-                            Ponto LED
-                          </th>
-                          <th className="w-[200px] border-x-[1px] border-slate-400">
-                            Ponto Enclave
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white h-[40px] text-center">
-                        <tr>
-                          <td className="border-x-[1px] border-slate-400">
-                            Holder 1
-                          </td>
-                          <td className="border-x-[1px] border-slate-400"></td>
-                          <td className="border-x-[1px] border-slate-400">A</td>
-                          <td className="border-x-[1px] border-slate-400">
-                            12
-                          </td>
-                          <td className="border-x-[1px] border-slate-400"></td>
-                          <td className="border-x-[1px] border-slate-400"></td>
-                        </tr>
-                        <tr>
-                          <td className="border-x-[1px] border-slate-400">
-                            Holder 2
-                          </td>
-                          <td className="border-x-[1px] border-slate-400"></td>
-                          <td className="border-x-[1px] border-slate-400">B</td>
-                          <td className="border-x-[1px] border-slate-400">
-                            15
-                          </td>
-                          <td className="border-x-[1px] border-slate-400"></td>
-                          <td className="border-x-[1px] border-slate-400"></td>
-                        </tr>
-                        <tr>
-                          <td className="border-x-[1px] border-slate-400">
-                            Holder 3
-                          </td>
-                          <td className="border-x-[1px] border-slate-400"></td>
-                          <td className="border-x-[1px] border-slate-400">C</td>
-                          <td className="border-x-[1px] border-slate-400">
-                            14
-                          </td>
-                          <td className="border-x-[1px] border-slate-400"></td>
-                          <td className="border-x-[1px] border-slate-400"></td>
-                        </tr>
-                      </tbody>
-                    </table>
+                    {GIGAData && (
+                      <table className="table-auto">
+                        <thead>
+                          <tr className="bg-slate-300 h-[40px] text-center ">
+                            <th className="w-[200px] border-x-[1px] border-slate-400">
+                              Holder
+                            </th>
+                            <th className="w-[200px] border-x-[1px] border-slate-400">
+                              Descrição
+                            </th>
+                            <th className="w-[200px] border-x-[1px] border-slate-400">
+                              X
+                            </th>
+                            <th className="w-[200px] border-x-[1px] border-slate-400">
+                              Y
+                            </th>
+                            <th className="w-[200px] border-x-[1px] border-slate-400">
+                              Ponto LED
+                            </th>
+                            <th className="w-[200px] border-x-[1px] border-slate-400">
+                              Ponto Enclave
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white h-[40px] text-center">
+                          <tr>
+                            <td className="border-x-[1px] border-slate-400">
+                              Holder 1
+                            </td>
+                            <td className="border-x-[1px] border-slate-400"></td>
+                            <td className="border-x-[1px] border-slate-400">
+                              A
+                            </td>
+                            <td className="border-x-[1px] border-slate-400">
+                              12
+                            </td>
+                            <td className="border-x-[1px] border-slate-400"></td>
+                            <td className="border-x-[1px] border-slate-400"></td>
+                          </tr>
+                          <tr>
+                            <td className="border-x-[1px] border-slate-400">
+                              Holder 2
+                            </td>
+                            <td className="border-x-[1px] border-slate-400"></td>
+                            <td className="border-x-[1px] border-slate-400">
+                              B
+                            </td>
+                            <td className="border-x-[1px] border-slate-400">
+                              15
+                            </td>
+                            <td className="border-x-[1px] border-slate-400"></td>
+                            <td className="border-x-[1px] border-slate-400"></td>
+                          </tr>
+                          <tr>
+                            <td className="border-x-[1px] border-slate-400">
+                              Holder 3
+                            </td>
+                            <td className="border-x-[1px] border-slate-400"></td>
+                            <td className="border-x-[1px] border-slate-400">
+                              C
+                            </td>
+                            <td className="border-x-[1px] border-slate-400">
+                              14
+                            </td>
+                            <td className="border-x-[1px] border-slate-400"></td>
+                            <td className="border-x-[1px] border-slate-400"></td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    )}
                   </div>
                 </div>
                 {newGIGA && (
