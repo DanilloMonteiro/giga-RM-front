@@ -7,7 +7,10 @@ const TesteServices = {
   stop: () => Api.get("/stop"),
   reprove: () => Api.get("/reprove"),
   aprove: () => Api.get("/aprove"),
-  gigaFind: () => Api.get("/GIGA"),
+  gigaFind: (params) =>
+    Api.get(`/GIGA/?name=${params}`).then(console.log(params)),
+  gigaUpdate: (id, params) => Api.put(`/GIGA/${id}`, params),
+  testeGIGAUpdate: (id, params) => Api.put(`/GIGA/teste/${id}`, params),
 };
 
 export default TesteServices;

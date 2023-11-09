@@ -10,6 +10,74 @@ export default function Home() {
   const [menu, setMenu] = useState(true);
   const [GIGASearch, setGIGASearch] = useState("");
   const [GIGAData, setGIGAData] = useState([]);
+  const [GIGACarregada, setGIGACarregada] = useState(false);
+
+  const [testeSearch, setTesteSearch] = useState("");
+  const [testeGIGA, setTesteGIGA] = useState([]);
+  const [testeCarregada, setTesteCarregada] = useState(false);
+
+  const [dados, setDados] = useState(GIGAData); // Supondo que GIGAData seja um array de objetos com seus dados
+  const [dados2, setDados2] = useState(testeGIGA); // Supondo que GIGAData seja um array de objetos com seus dados
+
+  // Função para atualizar os valores dos campos de entrada
+  const handleInputChange = (gindex, dindex, field, value) => {
+    const newDados = [...GIGAData];
+    console.log(newDados[gindex]);
+    if (field == "description") {
+      newDados[gindex].description[dindex] = value;
+    }
+    if (field == "x") {
+      newDados[gindex].x[dindex] = value;
+    }
+    if (field == "y") {
+      newDados[gindex].y[dindex] = value;
+    }
+    if (field == "led_pin") {
+      newDados[gindex].led_pin[dindex] = value;
+    }
+    if (field == "enclave_pin") {
+      newDados[gindex].enclave_pin[dindex] = value;
+    }
+    if (field == "holder_name") {
+      newDados[gindex].holder_name[dindex] = value;
+    }
+
+    setDados(newDados);
+  };
+
+  const handleInputChange2 = (gindex, dindex, field, value) => {
+    const newDados = [...testeGIGA];
+    console.log(newDados[gindex]);
+    if (field == "o_c_name") {
+      newDados[gindex].outputs_c[dindex].c_name = value;
+    }
+    if (field == "i_c_name") {
+      newDados[gindex].inputs_c[dindex].c_name = value;
+    }
+
+    setDados2(newDados);
+  };
+
+  // Função para salvar as modificações no banco de dados (simulada)
+  const handleSave = async () => {
+    await TesteServices.gigaUpdate(GIGAData[0]._id, dados)
+      .then((response) => {
+        console.log("Atualizacao de item no MongoDB feita com sucesso");
+      })
+      .catch((error) => {
+        console.error(`Erro ao atualizar o item no banco de dados:`, error);
+      });
+  };
+
+  const handleSave2 = async () => {
+    await TesteServices.testeGIGAUpdate(testeGIGA[0]._id, dados2)
+      .then((response) => {
+        console.log("Atualizacao de item no MongoDB feita com sucesso");
+      })
+      .catch((error) => {
+        console.error(`Erro ao atualizar o item no banco de dados:`, error);
+      });
+  };
 
   const openCreateGIGA = () => {
     setMenu(false);
@@ -23,14 +91,35 @@ export default function Home() {
 
   async function fetchGIGAAtual(search) {
     try {
-      const response = await TesteServices.gigaFind({ name: search });
+      console.log("search aqui", search);
+      const response = await TesteServices.gigaFind(search);
       if (response.data.status === "ok") {
         const giga1 = [response.data.giga];
 
         setGIGAData(...[giga1]);
+        setGIGACarregada(true);
       } else {
+        setGIGACarregada(false);
       }
     } catch (error) {
+      setGIGACarregada(false);
+      console.error("Erro ao buscar dados do teste:", error);
+    }
+  }
+
+  async function fetchTesteAtualGIGA(searchTeste) {
+    try {
+      const response = await TesteServices.find(searchTeste);
+      if (response.data.status === "ok") {
+        const teste1 = [response.data.teste];
+        console.log(teste1);
+        setTesteGIGA(...[teste1]);
+        setTesteCarregada(true);
+      } else {
+        setTesteCarregada(false);
+      }
+    } catch (error) {
+      setTesteCarregada(false);
       console.error("Erro ao buscar dados do teste:", error);
     }
   }
@@ -88,8 +177,10 @@ export default function Home() {
                     </h1>
                     <div className="flex w-2/6  rounded-md">
                       <input
-                        className="w-full h-full rounded-l-md border-[1px] border-slate-400"
-                        onChange={(e) => {}}
+                        className="w-full h-full rounded-l-md border-[1px] border-slate-400 px-3"
+                        onChange={(e) => {
+                          setGIGASearch(e.target.value);
+                        }}
                       ></input>
                       <button
                         onClick={() => {
@@ -114,81 +205,143 @@ export default function Home() {
                     </button>
                   </div>
                 </div>
-                <div className="flex flex-col p-3 gap-3 w-full h-full bg-slate-200 rounded-md">
+                <div className="flex flex-col p-3 gap-3 bg-slate-200 rounded-md w-auto h-full overflow-auto overscroll-x-contain overscroll-y-contain">
                   <div className="flex w-[27vw] gap-3">
                     <h1 className="w-full text-xl">GIGA atual: GIGA 1</h1>
                   </div>
-                  <div className="">
-                    {GIGAData && (
-                      <table className="table-auto">
-                        <thead>
-                          <tr className="bg-slate-300 h-[40px] text-center ">
-                            <th className="w-[200px] border-x-[1px] border-slate-400">
-                              Holder
-                            </th>
-                            <th className="w-[200px] border-x-[1px] border-slate-400">
-                              Descrição
-                            </th>
-                            <th className="w-[200px] border-x-[1px] border-slate-400">
-                              X
-                            </th>
-                            <th className="w-[200px] border-x-[1px] border-slate-400">
-                              Y
-                            </th>
-                            <th className="w-[200px] border-x-[1px] border-slate-400">
-                              Ponto LED
-                            </th>
-                            <th className="w-[200px] border-x-[1px] border-slate-400">
-                              Ponto Enclave
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody className="bg-white h-[40px] text-center">
-                          <tr>
-                            <td className="border-x-[1px] border-slate-400">
-                              Holder 1
-                            </td>
-                            <td className="border-x-[1px] border-slate-400"></td>
-                            <td className="border-x-[1px] border-slate-400">
-                              A
-                            </td>
-                            <td className="border-x-[1px] border-slate-400">
-                              12
-                            </td>
-                            <td className="border-x-[1px] border-slate-400"></td>
-                            <td className="border-x-[1px] border-slate-400"></td>
-                          </tr>
-                          <tr>
-                            <td className="border-x-[1px] border-slate-400">
-                              Holder 2
-                            </td>
-                            <td className="border-x-[1px] border-slate-400"></td>
-                            <td className="border-x-[1px] border-slate-400">
-                              B
-                            </td>
-                            <td className="border-x-[1px] border-slate-400">
-                              15
-                            </td>
-                            <td className="border-x-[1px] border-slate-400"></td>
-                            <td className="border-x-[1px] border-slate-400"></td>
-                          </tr>
-                          <tr>
-                            <td className="border-x-[1px] border-slate-400">
-                              Holder 3
-                            </td>
-                            <td className="border-x-[1px] border-slate-400"></td>
-                            <td className="border-x-[1px] border-slate-400">
-                              C
-                            </td>
-                            <td className="border-x-[1px] border-slate-400">
-                              14
-                            </td>
-                            <td className="border-x-[1px] border-slate-400"></td>
-                            <td className="border-x-[1px] border-slate-400"></td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    )}
+                  <div className="flex">
+                    {GIGACarregada &&
+                      GIGAData.map((g, gindex) => (
+                        <>
+                          <table className="table-auto">
+                            <thead>
+                              <tr className="bg-slate-300 h-[40px] text-center ">
+                                <th className="w-[200px] border-x-[1px] border-slate-400">
+                                  Holder
+                                </th>
+                                <th className="w-[200px] border-x-[1px] border-slate-400">
+                                  Descrição
+                                </th>
+                                <th className="w-[260px] border-x-[1px] border-slate-400">
+                                  X
+                                </th>
+                                <th className="w-[260px] border-x-[1px] border-slate-400">
+                                  Y
+                                </th>
+                                <th className="w-[200px] border-x-[1px] border-slate-400">
+                                  Ponto LED
+                                </th>
+                                <th className="w-[200px] border-x-[1px] border-slate-400">
+                                  Ponto Enclave
+                                </th>
+                              </tr>
+                            </thead>
+                            <tbody className="bg-white h-[40px] text-center">
+                              {g.led_pin.map((d, dindex) => (
+                                <>
+                                  <tr>
+                                    <td className="border-x-[1px] border-slate-400">
+                                      <input
+                                        className="text-center"
+                                        placeholder="Nome do holder..."
+                                        onChange={(e) => {
+                                          handleInputChange(
+                                            gindex,
+                                            dindex,
+                                            e.target.name,
+                                            e.target.value
+                                          );
+                                        }}
+                                        name="holder_name"
+                                        value={g.holder_name[dindex]}
+                                      ></input>
+                                    </td>
+
+                                    <td className="border-x-[1px] border-slate-400">
+                                      <input
+                                        className="text-center"
+                                        placeholder="Descrição..."
+                                        onChange={(e) => {
+                                          handleInputChange(
+                                            gindex,
+                                            dindex,
+                                            e.target.name,
+                                            e.target.value
+                                          );
+                                        }}
+                                        name="description"
+                                        value={g.description[dindex]}
+                                      ></input>
+                                    </td>
+                                    <td className="border-x-[1px] border-slate-400">
+                                      <input
+                                        onChange={(e) => {
+                                          handleInputChange(
+                                            gindex,
+                                            dindex,
+                                            e.target.name,
+                                            e.target.value
+                                          );
+                                        }}
+                                        name="x"
+                                        value={g.x[dindex]}
+                                        className="text-center"
+                                        placeholder="Coordenada X batalha naval..."
+                                      ></input>
+                                    </td>
+                                    <td className="border-x-[1px] border-slate-400">
+                                      <input
+                                        onChange={(e) => {
+                                          handleInputChange(
+                                            gindex,
+                                            dindex,
+                                            e.target.name,
+                                            e.target.value
+                                          );
+                                        }}
+                                        name="y"
+                                        value={g.y[dindex]}
+                                        className="text-center"
+                                        placeholder="Coordenada Y batalha naval..."
+                                      ></input>
+                                    </td>
+                                    <td className="border-x-[1px] border-slate-400">
+                                      <input
+                                        onChange={(e) => {
+                                          handleInputChange(
+                                            gindex,
+                                            dindex,
+                                            e.target.name,
+                                            e.target.value
+                                          );
+                                        }}
+                                        name="led_pin"
+                                        value={d}
+                                        className="text-center"
+                                      ></input>
+                                    </td>
+                                    <td className="border-x-[1px] border-slate-400">
+                                      <input
+                                        onChange={(e) => {
+                                          handleInputChange(
+                                            gindex,
+                                            dindex,
+                                            e.target.name,
+                                            e.target.value
+                                          );
+                                        }}
+                                        name="enclave_pin"
+                                        value={g.enclave_pin[dindex]}
+                                        className="text-center"
+                                      ></input>
+                                    </td>
+                                  </tr>
+                                </>
+                              ))}
+                            </tbody>
+                          </table>
+                        </>
+                      ))}
                   </div>
                 </div>
                 {newGIGA && (
@@ -227,21 +380,49 @@ export default function Home() {
                     </div>
                   </>
                 )}
+                <button
+                  className=" mt-3 text-lg bg-blue-400 text-white px-4 py-1 rounded-md hover:text-blue-400 hover:bg-white border-[1px] border-blue-400 font-semibold"
+                  onClick={handleSave}
+                >
+                  Salvar
+                </button>
               </>
             )}
             {codigoTEST && (
               <>
                 <div className="flex p-3 gap-10 ">
-                  <div className="flex w-[27vw] gap-3">
-                    <h1 className="w-full text-xl">Qual teste deseja criar?</h1>
-                    <input className="w-full border-[1px] border-slate-400 rounded-md px-3"></input>
-                  </div>
-                  <div className="flex w-[27vw] gap-3">
-                    <h1 className="w-full text-xl">Qual GIGA usar?</h1>
-                    <input
-                      className="w-full border-[1px] border-slate-400 rounded-md px-3"
-                      value={"GIGA 1"}
-                    ></input>
+                  <div className="flex w-full h-auto gap-5">
+                    <h1 className="w-1/6 h-auto text-xl align-middle pt-1">
+                      Qual Teste deseja modificar?
+                    </h1>
+                    <div className="flex w-2/6  rounded-md">
+                      <input
+                        className="w-full h-full rounded-l-md border-[1px] border-slate-400 px-3"
+                        onChange={(e) => {
+                          setTesteSearch(e.target.value);
+                        }}
+                      ></input>
+                      <button
+                        onClick={() => {
+                          fetchTesteAtualGIGA(testeSearch);
+                        }}
+                        className="ml-auto px-3 bg-blue-400 text-xl font-semibold rounded-r-md text-white hover:bg-white hover:text-blue-400 border-[1px] border-blue-400"
+                      >
+                        Procurar
+                      </button>
+                    </div>
+
+                    <span className=" h-auto text-xl align-middle pt-1">
+                      OU
+                    </span>
+                    <button
+                      onClick={() => {
+                        setNewGIGA(true);
+                      }}
+                      className="w-1/6 text-lg bg-blue-400 text-white px-4 py-1 rounded-md hover:text-blue-400 hover:bg-white border-[1px] border-blue-400 font-semibold"
+                    >
+                      Criar GIGA
+                    </button>
                   </div>
                 </div>
                 <div className="flex flex-col p-3 gap-3 w-full h-full bg-slate-200 rounded-md">
@@ -249,45 +430,101 @@ export default function Home() {
                     <h1 className="w-full text-xl">GIGA atual: GIGA 1</h1>
                   </div>
                   <div className="">
-                    <table className="table-auto">
-                      <thead>
-                        <tr className="bg-slate-300 h-[40px] text-center">
-                          <th className="w-[200px]">Laços</th>
-                          <th className="w-[200px]">C1</th>
-                          <th className="w-[200px]">C1 - IMAGE</th>
-                          <th className="w-[200px]">C2</th>
-                          <th className="w-[200px]">C2 - IMAGE</th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white h-[40px] text-center">
-                        <tr>
-                          <td>L1 - Out 65 - In 66</td>
-                          <td></td>
-                          <td>Holder 1</td>
-                          <td></td>
-                          <td>Holder 2</td>
-                          <td></td>
-                        </tr>
-                        <tr>
-                          <td>L2 - Out 62 - In 60</td>
-                          <td></td>
-                          <td>Holder 3</td>
-                          <td></td>
-                          <td>Holder 4</td>
-                          <td></td>
-                        </tr>
-                        <tr>
-                          <td>L3 - Out 68 - In 64</td>
-                          <td></td>
-                          <td>Holder 5</td>
-                          <td></td>
-                          <td>Holder 6</td>
-                          <td></td>
-                        </tr>
-                      </tbody>
-                    </table>
+                    {testeCarregada &&
+                      testeGIGA.map((g, gindex) => (
+                        <>
+                          <table className="table-auto">
+                            <thead>
+                              <tr className="bg-slate-300 h-[40px] text-center ">
+                                <th className="w-[200px] border-x-[1px] border-slate-400">
+                                  Laço
+                                </th>
+                                <th className="w-[200px] border-x-[1px] border-slate-400">
+                                  C1
+                                </th>
+                                <th className="w-[260px] border-x-[1px] border-slate-400">
+                                  C1 - imagem
+                                </th>
+                                <th className="w-[260px] border-x-[1px] border-slate-400">
+                                  C2
+                                </th>
+                                <th className="w-[200px] border-x-[1px] border-slate-400">
+                                  C2 - imagem
+                                </th>
+                              </tr>
+                            </thead>
+                            <tbody className="bg-white h-[40px] text-center">
+                              {g.outputs.map((d, dindex) => (
+                                <>
+                                  <tr>
+                                    <td className="border-x-[1px] border-slate-400">
+                                      <input
+                                        className="text-center"
+                                        value={`O- ${d} I- ${g.inputs[dindex]}`}
+                                      ></input>
+                                    </td>
+
+                                    <td className="border-x-[1px] border-slate-400">
+                                      <input
+                                        className="text-center"
+                                        placeholder="Conector 1..."
+                                        onChange={(e) => {
+                                          handleInputChange2(
+                                            gindex,
+                                            dindex,
+                                            e.target.name,
+                                            e.target.value
+                                          );
+                                        }}
+                                        name="o_c_name"
+                                        value={g.outputs_c[dindex].c_name}
+                                      ></input>
+                                    </td>
+                                    <td className="border-x-[1px] border-slate-400">
+                                      <input
+                                        className="text-center"
+                                        placeholder="Imagem do conector 1..."
+                                        name=""
+                                      ></input>
+                                    </td>
+                                    <td className="border-x-[1px] border-slate-400">
+                                      <input
+                                        className="text-center"
+                                        placeholder="Conector 2..."
+                                        onChange={(e) => {
+                                          handleInputChange2(
+                                            gindex,
+                                            dindex,
+                                            e.target.name,
+                                            e.target.value
+                                          );
+                                        }}
+                                        name="i_c_name"
+                                        value={g.inputs_c[dindex].c_name}
+                                      ></input>
+                                    </td>
+                                    <td className="border-x-[1px] border-slate-400">
+                                      <input
+                                        className="text-center"
+                                        placeholder="Imagem do conector 2..."
+                                        name=""
+                                      ></input>
+                                    </td>
+                                  </tr>
+                                </>
+                              ))}
+                            </tbody>
+                          </table>
+                        </>
+                      ))}
                   </div>
                 </div>
+                <button
+                  className=" mt-3 text-lg bg-blue-400 text-white px-4 py-1 rounded-md hover:text-blue-400 hover:bg-white border-[1px] border-blue-400 font-semibold"
+                  onClick={handleSave2}
+                >
+                  Salvar
+                </button>
               </>
             )}
           </div>

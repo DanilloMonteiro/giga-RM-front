@@ -252,6 +252,17 @@ export default function Home() {
     }
   }
 
+  const numLinhas = 7;
+  const numColunas = 58;
+
+  const letras = ["A", "B", "C", "D", "E", "F", "G"];
+
+  // Crie um array com valores para preencher as células da tabela
+  const valores = Array.from(
+    { length: numLinhas * numColunas },
+    (_, index) => index + 1
+  );
+
   useEffect(() => {
     socket.on("modificacao", (data) => {
       console.log(".");
@@ -277,7 +288,7 @@ export default function Home() {
   return (
     <div className="flex w-full h-full">
       <div className="flex w-screen h-screen bg-blue-400 justify-center items-center">
-        <div className="flex static w-[90vw] h-[90vh] gap-10 bg-white rounded-xl drop-shadow-lg p-7">
+        <div className="flex static w-[97vw] h-[94vh] gap-10 bg-white rounded-xl drop-shadow-lg p-7">
           {carregado === false && (
             <>
               <div className="flex flex-col w-full  h-full bg-white items-center rounded-md">
@@ -342,7 +353,73 @@ export default function Home() {
 
           {carregado == true && (
             <>
-              <div className="flex flex-col w-3/6 h-full">
+              <div className="flex flex-col w-full h-full justify-center items-center bg-slate-200">
+                <div className="w-full h-2/4 bg-white">
+                  <div className="flex w-full h-full justify-center items-start bg-slate-200">
+                    <div className="w-full h-full bg-white border-[1px] border-slate-400 rounded-md">
+                      <table className="tabela">
+                        <thead>
+                          <tr>
+                            <td
+                              className={`w-[35px] h-[35px] border-[1px] border-slate-400`}
+                            ></td>
+                            {Array.from({ length: numColunas }).map(
+                              (_, colIndex) => (
+                                <td
+                                  key={colIndex}
+                                  className={`w-[35px] h-[35px] border-[1px] border-slate-400`}
+                                >
+                                  {valores[colIndex]}
+                                </td>
+                              )
+                            )}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {Array.from({ length: numLinhas }).map(
+                            (_, rowIndex) => (
+                              <tr key={rowIndex}>
+                                <td
+                                  className={`w-[35px] h-[56px] border-[1px] border-slate-400 "bg-white"`}
+                                >
+                                  {letras[rowIndex]}
+                                </td>
+                                {Array.from({ length: numColunas }).map(
+                                  (_, colIndex) => (
+                                    <td
+                                      key={colIndex}
+                                      className={`w-[35px] h-[56px] border-[1px] border-slate-400 ${
+                                        valores[
+                                          rowIndex * numColunas + colIndex
+                                        ] %
+                                          2 ===
+                                        0
+                                          ? "bg-white"
+                                          : "bg-white"
+                                      }`}
+                                    >
+                                      {}
+                                    </td>
+                                  )
+                                )}
+                              </tr>
+                            )
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex w-full h-2/4 bg-white">
+                  <div className="flex w-1/2 h-full justify-center items-center border-[1px] border-slate-400 rounded-md">
+                    <h1>Imagem do conector</h1>
+                  </div>
+                  <div className="flex w-1/2 h-full justify-center items-center border-[1px] border-slate-400 rounded-md">
+                    <h1>Imagem do conector</h1>
+                  </div>
+                </div>
+              </div>
+              {/* <div className="flex flex-col w-3/6 h-full">
                 <div className="flex flex-col w-full h-full bg-slate-400 gap-2 pt-10 p-2 rounded-2xl">
                   <div className="flex flex-col w-full h-auto gap-4 mb-4">
                     <h1 className="text-4xl font-bold bg-slate-300 rounded-lg p-2">
@@ -554,7 +631,7 @@ export default function Home() {
                   <WarningCircle size={300} className="text-white" />
                   <h1 className="text-white text-9xl">Cabo Reprovado</h1>
                 </div>
-              )}
+              )} */}
             </>
           )}
         </div>
