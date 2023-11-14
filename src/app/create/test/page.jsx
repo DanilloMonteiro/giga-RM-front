@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import TesteServices from "../../../../services/teste";
+import Api from "../../../../services/api";
 
 export default function Home() {
   const [codigoGIGA, setCodigoGIGA] = useState(false);
@@ -58,8 +59,29 @@ export default function Home() {
     setDados2(newDados);
   };
 
+  const handleUpload = async (event, type, idTeste, idConector) => {
+    const file = event.target.files[0];
+    console.log("File in handleUpload:", file);
+
+    if (file) {
+      try {
+        const data = new FormData();
+
+        data.append("file", file);
+        data.append("idTeste", idTeste);
+        data.append("idConector", idConector);
+        data.append("type", type);
+
+        Api.post("/upload", data);
+      } catch (error) {
+        console.error("Erro de rede:", error);
+      }
+    }
+  };
+
   // Função para salvar as modificações no banco de dados (simulada)
   const handleSave = async () => {
+    console.log(dados);
     await TesteServices.gigaUpdate(GIGAData[0]._id, dados)
       .then((response) => {
         console.log("Atualizacao de item no MongoDB feita com sucesso");
@@ -259,6 +281,7 @@ export default function Home() {
 
                                     <td className="border-x-[1px] border-slate-400">
                                       <input
+                                        tabindex="-1"
                                         className="text-center"
                                         placeholder="Descrição..."
                                         onChange={(e) => {
@@ -275,6 +298,7 @@ export default function Home() {
                                     </td>
                                     <td className="border-x-[1px] border-slate-400">
                                       <input
+                                        tabindex="-1"
                                         onChange={(e) => {
                                           handleInputChange(
                                             gindex,
@@ -291,6 +315,7 @@ export default function Home() {
                                     </td>
                                     <td className="border-x-[1px] border-slate-400">
                                       <input
+                                        tabindex="-1"
                                         onChange={(e) => {
                                           handleInputChange(
                                             gindex,
@@ -307,6 +332,7 @@ export default function Home() {
                                     </td>
                                     <td className="border-x-[1px] border-slate-400">
                                       <input
+                                        tabindex="-1"
                                         onChange={(e) => {
                                           handleInputChange(
                                             gindex,
@@ -322,6 +348,7 @@ export default function Home() {
                                     </td>
                                     <td className="border-x-[1px] border-slate-400">
                                       <input
+                                        tabindex="-1"
                                         onChange={(e) => {
                                           handleInputChange(
                                             gindex,
@@ -435,7 +462,7 @@ export default function Home() {
                         <>
                           <table className="table-auto">
                             <thead>
-                              <tr className="bg-slate-300 h-[40px] text-center ">
+                              <tr className="bg-slate-300 h-[40px] text-center border-t-[1px] border-slate-400">
                                 <th className="w-[200px] border-x-[1px] border-slate-400">
                                   Laço
                                 </th>
@@ -456,7 +483,7 @@ export default function Home() {
                             <tbody className="bg-white h-[40px] text-center">
                               {g.outputs.map((d, dindex) => (
                                 <>
-                                  <tr>
+                                  <tr className="border-y-[1px] border-slate-400">
                                     <td className="border-x-[1px] border-slate-400">
                                       <input
                                         className="text-center"
@@ -481,11 +508,18 @@ export default function Home() {
                                       ></input>
                                     </td>
                                     <td className="border-x-[1px] border-slate-400">
+                                      <span>{g.outputs_c[dindex].c_src}</span>
                                       <input
-                                        className="text-center"
-                                        placeholder="Imagem do conector 1..."
-                                        name=""
-                                      ></input>
+                                        type="file"
+                                        onChange={(e) =>
+                                          handleUpload(
+                                            e,
+                                            "out",
+                                            g._id,
+                                            g.outputs_c[dindex]._id
+                                          )
+                                        }
+                                      />
                                     </td>
                                     <td className="border-x-[1px] border-slate-400">
                                       <input
@@ -504,11 +538,18 @@ export default function Home() {
                                       ></input>
                                     </td>
                                     <td className="border-x-[1px] border-slate-400">
+                                      <span>{g.inputs_c[dindex].c_src}</span>
                                       <input
-                                        className="text-center"
-                                        placeholder="Imagem do conector 2..."
-                                        name=""
-                                      ></input>
+                                        type="file"
+                                        onChange={(e) =>
+                                          handleUpload(
+                                            e,
+                                            "in",
+                                            g._id,
+                                            g.inputs_c[dindex]._id
+                                          )
+                                        }
+                                      />
                                     </td>
                                   </tr>
                                 </>
