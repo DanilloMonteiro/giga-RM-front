@@ -412,7 +412,7 @@ export default function Home() {
         <div className="flex static w-[97vw] h-[94vh] gap-10 bg-white rounded-xl drop-shadow-lg p-7">
           {carregado === false && (
             <>
-              <div className="flex flex-col w-full  h-full bg-white items-center rounded-md">
+              <div className="flex flex-row w-full justify-center h-full bg-white items-center rounded-md">
                 <Image
                   src="/1529355861725-removebg-preview.png" // Caminho para a imagem na pasta "public"
                   alt="Minha Imagem" // Texto alternativo para acessibilidade
@@ -537,7 +537,7 @@ export default function Home() {
                     </div>
                     <div className="flex w-[94vw] h-2/4 bg-white">
                       <div className="flex w-full h-full justify-start items-center border-[1px] border-slate-400 rounded-md overflow-x-auto whitespace-nowrap">
-                        {images.map((i, index) => (
+                        {/* {images.map((i, index) => (
                           <>
                             <div
                               className={`flex min-w-[230px] h-full flex-col text-center ${
@@ -563,7 +563,11 @@ export default function Home() {
                                 alt="Picture of the author"
                               />
                             </div>
-                            <button
+                            
+                          </>
+                          
+                        ))} */}
+<button
                               className="bg-slate-200"
                               onClick={() => {
                                 concluirBatalha();
@@ -571,9 +575,6 @@ export default function Home() {
                             >
                               Concluir batalha
                             </button>
-                          </>
-                        ))}
-
                         {/* <button
                           className="bg-slate-200"
                           onClick={() => {
