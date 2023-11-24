@@ -19,6 +19,11 @@ export default function Home() {
   const letras = ["A", "B", "C", "D", "E", "F", "G"];
   const numColunas = 116;
 
+  const [update, setUpdate] = useState(false)
+
+  const [isTesteOk, setTesteOk] = useState("ok");
+  const [placa, setPlacas] = useState("")
+
   const [reprovados, setReprovados] = useState(0);
   const [aprovados, setAprovados] = useState(0);
   const [teste, setTeste] = useState([]);
@@ -68,6 +73,19 @@ export default function Home() {
     setREError(false);
   };
 
+  const ativarFuncao = () => {
+    setTesteOk("Testando");
+
+    // Redefine para vermelho após 5 segundos
+    setTimeout(() => {
+      setTesteOk("Parado");
+    }, 5000);
+  };
+
+  const handleCheckboxChange = () => {
+    setUpdate(!update); // Inverte o valor do estado ao clicar no checkbox
+  };
+
   const formatCurrentDate = (date) => {
     const day = date.getDate().toString().padStart(2, "0");
     const month = (date.getMonth() + 1).toString().padStart(2, "0");
@@ -82,6 +100,13 @@ export default function Home() {
       console.error("Erro ao iniciar teste:", error);
       setCarregado(false); // Define carregado como false em caso de erro
     }
+  }
+
+  async function Reiniciar() {
+    setTesteScreen(false)
+    setCarregado(false)
+    setSearch("")
+    setRE("")
   }
 
   async function stopTeste() {
@@ -135,13 +160,16 @@ export default function Home() {
     }
   }
 
-  async function fetchTesteAtual(testeCode, re) {
+  async function fetchTesteAtual(testeCode, re, update) {
     try {
       if (re == "") {
         setREError(true);
         return;
       }
-      const response = await TesteServices.find(testeCode);
+      const response = await TesteServices.find(testeCode, re, update);
+
+      console.log(response.data.status)
+
       if (response.data.status === "ok") {
         teste1 = [response.data.teste];
         setTesteCopia(...[teste1]);
@@ -224,6 +252,7 @@ export default function Home() {
     }
     console.log(teste1, teste2);
   }
+
 
   async function fetchTesteAtualGIGA(testeCode, re) {
     try {
@@ -378,6 +407,23 @@ export default function Home() {
           return newTeste;
         });
     
+      } else if (data[0] == 7) {
+        setPlacas((prevTeste) => {
+          let newTeste = prevTeste // Clone o objeto teste[0]
+
+          newTeste = data[1]
+
+          return newTeste;
+        });
+
+        setLED((prevTeste) => {
+          let newTeste = prevTeste // Clone o objeto teste[0]
+
+          newTeste = data[2]
+
+          return newTeste;
+        });
+    
       }
     } else {
     }
@@ -410,6 +456,8 @@ export default function Home() {
       TesteFunction(data);
     });
 
+    ativarFuncao()
+
     return () => {
       socket.off("modificacao");
     };
@@ -431,69 +479,71 @@ export default function Home() {
       <div className="flex w-screen h-screen bg-blue-400 justify-center items-center">
         <div className="flex static w-[97vw] h-[94vh] gap-10 bg-white rounded-xl drop-shadow-lg p-7">
           {carregado === false && (
-            <>
-              <div className="flex flex-row w-full justify-center h-full bg-white items-center rounded-md">
-                <Image
-                  src="/1529355861725-removebg-preview.png" // Caminho para a imagem na pasta "public"
-                  alt="Minha Imagem" // Texto alternativo para acessibilidade
-                  width={300} // Largura da imagem (ajuste conforme necessário)
-                  height={300} // Altura da imagem (ajuste conforme necessário)
-                />
-                <div className="flex flex-col w-[600px] bg-slate-300 px-20 pb-20">
-                  <div className="flex items-center mt-10 justify-between">
-                    <label className="flex bg-slate-400 text-white font-semibold w-[200px] h-[40px] border-[2px] justify-center items-center border-slate-400 rounded-sm">
-                      RE:
-                    </label>
-                    <input
-                      className="border-[1px] rounded-sm p-2"
-                      placeholder="Digite o RE"
-                      onChange={(e) => handleChangeRE(e.target.value)}
-                    ></input>
-                  </div>
-                  <div className="flex">
-                    {REError && (
-                      <span className="w-full h-4 text-red-500 ml-3">
-                        Esse campo é obrigatorio*
-                      </span>
-                    )}
+             <>
+             <div className="flex flex-row w-full justify-center h-full bg-white items-center rounded-md">
+               <Image
+                 src="/1529355861725-removebg-preview.png" // Caminho para a imagem na pasta "public"
+                 alt="Minha Imagem" // Texto alternativo para acessibilidade
+                 width={300} // Largura da imagem (ajuste conforme necessário)
+                 height={300} // Altura da imagem (ajuste conforme necessário)
+               />
+               <div className="flex flex-col w-[600px] bg-slate-300 px-20 pb-20">
+                 <div className="flex items-center mt-10 justify-between">
+                   <label className="flex bg-slate-400 text-white font-semibold w-[210px] h-[40px] border-[2px] justify-center items-center border-slate-400 rounded-sm">
+                     RE:
+                   </label>
+                   <input
+                     className="border-[1px] w-full rounded-sm p-2"
+                     placeholder="Digite o RE"
+                     onChange={(e) => handleChangeRE(e.target.value)}
+                   ></input>
+                 </div>
+                 <div className="flex">
+                   {REError && (
+                     <span className="w-full h-4 text-red-500 ml-3">
+                       Esse campo é obrigatorio*
+                     </span>
+                   )}
 
-                    <span className="w-full h-4 text-red-500"></span>
-                  </div>
-                  <div className="flex items-center mt-6 justify-between">
-                    <button
-                      onClick={() => fetchTesteAtual(search, RE)}
-                      className="bg-blue-400 text-white font-semibold w-[200px] h-[40px] border-[2px] border-blue-400 rounded-sm hover:text-blue-400 hover:bg-white"
-                    >
-                      Iniciar Teste
-                    </button>
-                    <input
-                      className="border-[1px] rounded-sm p-2"
-                      placeholder="Digite o código do teste"
-                      onChange={(e) => handleChangeTeste(e.target.value)}
-                    ></input>
-                  </div>
-                  <div className="flex">
-                    {searchError && (
-                      <span className="w-full h-4 text-red-500 ml-3">
-                        Teste não encontrado*
-                      </span>
-                    )}
+                   <span className="w-full h-4 text-red-500"></span>
+                 </div>
+                 <div className="flex items-center mt-6 justify-between">
+                   <button
+                     onClick={() => fetchTesteAtual(search, RE, update)}
+                     className="bg-blue-400 text-white font-semibold w-[200px] h-[40px] border-[2px] border-blue-400 rounded-sm hover:text-blue-400 hover:bg-white"
+                   >
+                     Iniciar Teste
+                   </button>
+                   
+                   <input
+                     className="border-[1px] w-[200px] rounded-sm p-2"
+                     placeholder="Digite o código do teste"
+                     onChange={(e) => handleChangeTeste(e.target.value)}
+                   ></input>
+                   <div className="flex bg-white h-[40px] justify-center items-center px-1 pr-2">
+                     <input type="checkbox" className="mx-1" checked={update} onClick={() => {handleCheckboxChange()}}></input>
+                     <h3 className="text-center" >Atualizar</h3>
+                    </div>
+                   
+                 </div>
+                 <div className="flex">
+                   {searchError && (
+                     <span className="w-full h-4 text-red-500 ml-3">
+                       Teste não encontrado*
+                     </span>
+                   )}
 
-                    <span className="w-full h-4 text-red-500"></span>
-                  </div>
+                   <span className="w-full h-4 text-red-500"></span>
+                 </div>
 
-                  <div className="flexjustify-start mt-6">
-                    <button className="bg-blue-400 text-white font-semibold w-[200px] h-[40px] rounded-sm border-[2px] border-blue-400 hover:text-blue-400 hover:bg-white">
-                      <Link href={`/create/test`}>Criar Teste GIGA</Link>
-                    </button>
-                  </div>
-                  <div className="flex flex-col">
-                    <label>ENCLAVE</label><input value={ENCLAVE}></input>
-                    <label>LED</label><input value={LED}></input>
-                  </div>
-                </div>
-              </div>
-            </>
+                 <div className="flexjustify-start mt-6">
+                   <button className="bg-blue-400 text-white font-semibold w-[200px] h-[40px] rounded-sm border-[2px] border-blue-400 hover:text-blue-400 hover:bg-white">
+                     <Link href={`/create/test`}>Criar Teste GIGA</Link>
+                   </button>
+                 </div>
+               </div>
+             </div>
+           </>
           )}
 
           {carregado == true && (
@@ -513,12 +563,13 @@ export default function Home() {
                           <table className="tabela">
                             <thead>
                               <tr>
-                                <th className="w-[10px] h-[30px] border-[1px] border-slate-400 bg-slate-300 text-center"></th>
+                                <th className="w-[10px] h-[30px] border-[2px] border-slate-400 bg-slate-300 text-center"></th>
                                 {Array.from({ length: numColunas }).map(
                                   (_, colIndex) => (
                                     <th
-                                      className="w-[15px] h-[35px] border-[1px] border-slate-400 bg-slate-300 text-center text-[10px]"
+                                      className="w-[15px] h-[35px] border-[2px]  border-slate-400 bg-slate-300 text-center text-[10px]"
                                       key={colIndex + 1}
+                                      style={{ writingMode: 'vertical-rl', textOrientation: 'mixed', transform: 'rotate(180deg)' }}
                                     >
                                       {colIndex + 1}
                                     </th>
@@ -530,7 +581,7 @@ export default function Home() {
                               {Array.from({ length: 7 }).map((_, rowIndex) => (
                                 <tr key={rowIndex}>
                                   <td
-                                    className={`w-[5px] h-[39px] border-[1px] border-slate-400 bg-slate-300 text-center font-bold`}
+                                    className={`w-[5px] h-[39px] border-[2px] border-slate-400 bg-slate-300 text-center font-bold`}
                                   >
                                     {letras[rowIndex]}
                                   </td>
@@ -627,15 +678,21 @@ export default function Home() {
                     <div className="flex flex-row w-full h-2/4 mr-10 gap-5 bg-white">
                       <div className="flex flex-col w-full h-full bg-slate-400 gap-2 p-2 rounded-2xl ">
                         <div className="flex flex-col w-full h-auto gap-4 mb-2">
-                          <h1 className="text-4xl font-bold bg-slate-300 rounded-lg p-2">
-                            Teste: {teste[0].product_code}
-                            <span className="text-2xl">
-                              Dia: {formatCurrentDate(time)}{" "}
+                          <div className="flex flex-row text-2xl font-bold bg-slate-300 rounded-lg p-2 gap-16 items-center">
+                            <span>
+                              Teste: {teste[0].product_code}
                             </span>
-                            <span className="text-2xl">
+                            <span>
+                              Dia: {formatCurrentDate(time)}
+                            </span>
+                            <span>
                               Horário: {time.toLocaleTimeString()}
                             </span>
-                          </h1>
+                            <div className="flex ml-auto gap-3 mr-2">
+                              <span className="text-xl ">Status: {isTesteOk} {placa}</span>
+                              <div className={`w-[30px] h-[30px] rounded-full border-[1px] border-slate-700 ${isTesteOk == "Testando" ? "piscar bg-green-400" : ""} ${isTesteOk == "Parado" ? "piscar1 bg-red-400" : ""}`}></div>
+                            </div>
+                          </div>
                         </div>
                         <div className="progress-container">
                           <div
@@ -724,42 +781,43 @@ export default function Home() {
                           </label>
                         </div>
                         <div className="flex flex-col py-2 mt-auto gap-2 items-center bg-slate-400 rounded-xl">
-                          <div className="flex">
-                          <button
-                            onClick={() => {
-                              Reprovar();
-                            }}
-                            className="w-[150px] h-[80px] rounded-md text-2xl bg-red-400 hover:bg-white hover:text-red-400 text-white font-bold border-[2px] border-red-400"
-                          >
-                            Reprovar chicote
-                          </button>
-                          <button
-                            onClick={() => {
-                              Reprovar();
-                            }}
-                            className="w-[150px] h-[80px] rounded-md text-2xl bg-red-400 hover:bg-white hover:text-red-400 text-white font-bold border-[2px] border-red-400"
-                          >
-                            Reprovar chicote
-                          </button> 
-                          </div>
-                          
-                          
-                          <button
-                            onClick={() => {
-                              startTeste();
-                            }}
-                            className="w-[150px] h-[80px] rounded-md text-2xl bg-red-400 hover:bg-white hover:text-red-400 text-white font-bold border-[2px] border-red-400"
-                          >
-                            Testar
-                          </button>
-                          <button
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => {
+                                Aprovar();
+                              }}
+                              className="w-[150px] h-[80px] sm:w-[80px] sm:text-sm rounded-md text-2xl bg-green-400 hover:bg-white hover:text-green-400 text-white font-bold border-[2px] border-green-400"
+                            >
+                              Aprovar chicote
+                            </button>
+                            <button
+                              onClick={() => {
+                                Reprovar();
+                              }}
+                              className="w-[150px] h-[80px] sm:w-[80px] sm:text-sm rounded-md text-2xl bg-red-400 hover:bg-white hover:text-red-400 text-white font-bold border-[2px] border-red-400"
+                            >
+                              Reprovar chicote
+                            </button>
+                          </div>                      
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => {
+                                Reiniciar();
+                              }}
+                              className="w-[150px] h-[80px] sm:w-[80px] sm:text-sm rounded-md text-2xl bg-blue-400 hover:bg-white hover:text-blue-400 text-white font-bold border-[2px] border-blue-400"
+                            >
+                              Setup
+                            </button>
+                            <button
                             onClick={() => {
                               fetchTesteAtualGIGA();
                             }}
-                            className="w-[150px] h-[80px] rounded-md text-2xl bg-green-400 hover:bg-white hover:text-green-400 text-white font-bold border-[2px] border-green-400"
-                          >
-                            Teste de pontos
-                          </button>
+                            className="w-[150px] h-[80px] sm:w-[80px] sm:text-sm rounded-md text-2xl bg-blue-400 hover:bg-white hover:text-blue-400 text-white font-bold border-[2px] border-blue-400"
+                            >
+                              Teste de pontos
+                            </button>
+                          </div>
+                          
                         </div>
                       </div>
                     </div>

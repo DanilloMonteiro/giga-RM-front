@@ -39,3 +39,29 @@
   justify-content: center; /* Centraliza horizontalmente */
   align-items: center; /* Centraliza verticalmente */
 }
+
+@keyframes piscar {
+  0%, 100% {
+    background-color: #8af88e; /* verde claro */
+  }
+  50% {
+    background-color: #1fff2a; /* verde escuro */
+  }
+}
+
+.piscar {
+  animation: piscar 1s infinite;
+}
+
+@keyframes piscar1 {
+  0%, 100% {
+    background-color: rgb(255, 23, 23); /* verde claro */
+  }
+  50% {
+    background-color: #ff6969; /* verde escuro */
+  }
+}
+
+.piscar1 {
+  animation: piscar1 1s infinite;
+}
