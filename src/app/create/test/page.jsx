@@ -452,7 +452,7 @@ export default function Home() {
                     </button>
                   </div>
                 </div>
-                <div className="flex flex-col p-3 gap-3 w-full h-full bg-slate-200 rounded-md">
+                <div className="flex flex-col p-3 gap-3 w-full h-full bg-slate-200 rounded-md overflow-auto overscroll-x-contain overscroll-y-contain">
                   <div className="flex w-[27vw] gap-3">
                     <h1 className="w-full text-xl">GIGA atual: GIGA 1</h1>
                   </div>
@@ -561,10 +561,10 @@ export default function Home() {
                   </div>
                 </div>
                 <button
-                  className=" mt-3 text-lg bg-blue-400 text-white px-4 py-1 rounded-md hover:text-blue-400 hover:bg-white border-[1px] border-blue-400 font-semibold"
-                  onClick={handleSave2}
+                className=" mt-3 text-lg bg-blue-400 text-white px-4 py-1 rounded-md hover:text-blue-400 hover:bg-white border-[1px] border-blue-400 font-semibold"
+                onClick={handleSave2}
                 >
-                  Salvar
+                Salvar
                 </button>
               </>
             )}

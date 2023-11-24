@@ -17,7 +17,7 @@ export default function Home() {
   const tabela = [];
 
   const letras = ["A", "B", "C", "D", "E", "F", "G"];
-  const numColunas = 58;
+  const numColunas = 116;
 
   const [reprovados, setReprovados] = useState(0);
   const [aprovados, setAprovados] = useState(0);
@@ -29,6 +29,9 @@ export default function Home() {
 
   const [batalhaScreen, setBatalhaScreen] = useState(false);
   const [testeScreen, setTesteScreen] = useState(false);
+
+  const [LED, setLED] = useState("")
+  const [ENCLAVE, setENCLAVE] = useState("")
 
   const [testePontos, setTestePontos] = useState(false);
 
@@ -358,6 +361,23 @@ export default function Home() {
             }
           }
         }
+      } else if (data[0] == 6) {
+        setENCLAVE((prevTeste) => {
+         let newTeste = prevTeste // Clone o objeto teste[0]
+
+          newTeste = data[1]
+
+          return newTeste;
+        });
+
+        setLED((prevTeste) => {
+          let newTeste = prevTeste // Clone o objeto teste[0]
+
+          newTeste = data[2]
+
+          return newTeste;
+        });
+    
       }
     } else {
     }
@@ -467,6 +487,10 @@ export default function Home() {
                       <Link href={`/create/test`}>Criar Teste GIGA</Link>
                     </button>
                   </div>
+                  <div className="flex flex-col">
+                    <label>ENCLAVE</label><input value={ENCLAVE}></input>
+                    <label>LED</label><input value={LED}></input>
+                  </div>
                 </div>
               </div>
             </>
@@ -493,7 +517,7 @@ export default function Home() {
                                 {Array.from({ length: numColunas }).map(
                                   (_, colIndex) => (
                                     <th
-                                      className="w-[35px] h-[35px] border-[1px] border-slate-400 bg-slate-300 text-center"
+                                      className="w-[15px] h-[35px] border-[1px] border-slate-400 bg-slate-300 text-center text-[10px]"
                                       key={colIndex + 1}
                                     >
                                       {colIndex + 1}
@@ -506,15 +530,15 @@ export default function Home() {
                               {Array.from({ length: 7 }).map((_, rowIndex) => (
                                 <tr key={rowIndex}>
                                   <td
-                                    className={`w-[35px] h-[39px] border-[1px] border-slate-400 bg-slate-300 text-center font-bold`}
+                                    className={`w-[5px] h-[39px] border-[1px] border-slate-400 bg-slate-300 text-center font-bold`}
                                   >
                                     {letras[rowIndex]}
                                   </td>
                                   {batalha
-                                    .slice(rowIndex * 58, (rowIndex + 1) * 58)
+                                    .slice(rowIndex * 116, (rowIndex + 1) * 116)
                                     .map((item, itemIndex) => (
                                       <td
-                                        className={`w-[10px] h-[55px] border-[1px] border-slate-400 text-center ${
+                                        className={`w-[5px] h-[55px] border-[1px] border-slate-400 text-center ${
                                           item.status == null ? "bg-white" : ""
                                         }${
                                           item.status == false
@@ -700,6 +724,7 @@ export default function Home() {
                           </label>
                         </div>
                         <div className="flex flex-col py-2 mt-auto gap-2 items-center bg-slate-400 rounded-xl">
+                          <div className="flex">
                           <button
                             onClick={() => {
                               Reprovar();
@@ -708,6 +733,17 @@ export default function Home() {
                           >
                             Reprovar chicote
                           </button>
+                          <button
+                            onClick={() => {
+                              Reprovar();
+                            }}
+                            className="w-[150px] h-[80px] rounded-md text-2xl bg-red-400 hover:bg-white hover:text-red-400 text-white font-bold border-[2px] border-red-400"
+                          >
+                            Reprovar chicote
+                          </button> 
+                          </div>
+                          
+                          
                           <button
                             onClick={() => {
                               startTeste();
