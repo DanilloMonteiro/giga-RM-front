@@ -286,7 +286,7 @@ export default function Home() {
   const progress =
     teste.length === 0
       ? 100
-      : ((maxItens - teste[0].outputs.length) / maxItens) * 100; // Defina MAX_ITEMS como o tamanho máximo do array
+      : 50; // Defina MAX_ITEMS como o tamanho máximo do array
 
   const progress1 =
     teste.length === 0
@@ -694,18 +694,25 @@ export default function Home() {
                             </div>
                           </div>
                         </div>
-                        <div className="progress-container">
+                        <div>
+                          <div className="flex w-full justify-center text-lg font-semibold">  
+                              {progress === 0 && "Aguardando Teste"}
+                              {progress === 100 && "Teste Concluído" && Aprovar()}
+                              {progress !== 0 &&
+                                progress !== 100 &&
+                                `${progress.toFixed(2)}%`}
+                          </div>
+                          <div className="flex progress-container">
+                          
                           <div
                             className="progress"
                             style={{ width: `${progress}%` }}
                           >
-                            {progress === 0 && "Aguardando Teste"}
-                            {progress === 100 && "Teste Concluído" && Aprovar()}
-                            {progress !== 0 &&
-                              progress !== 100 &&
-                              `${progress.toFixed(2)}%`}
+                           
+                          </div>
                           </div>
                         </div>
+                        
                         {carregado === true && (
                           <div className="flex w-full overflow-y-auto max-h-full">
                             {teste[0].product_code === search ? (
