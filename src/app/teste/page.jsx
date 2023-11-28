@@ -103,6 +103,7 @@ export default function Home() {
   }
 
   async function Reiniciar() {
+    await TesteServices.stop();
     setTesteScreen(false)
     setCarregado(false)
     setSearch("")
@@ -229,7 +230,7 @@ export default function Home() {
             }
           }
         }
-        console.log("imagessssssssssssssss", index11);
+        console.log("imagessssssssssssssss", teste1);
 
         setBataIndex(index11);
         setCoord(coord);
@@ -286,8 +287,8 @@ export default function Home() {
   const progress =
     teste.length === 0
       ? 100
-      : 50; // Defina MAX_ITEMS como o tamanho máximo do array
-
+      : ((maxItens - teste[0].outputs.length) / maxItens) * 100; // Defina MAX_ITEMS como o tamanho máximo do array
+      
   const progress1 =
     teste.length === 0
       ? 100
