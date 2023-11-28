@@ -613,7 +613,7 @@ export default function Home() {
                     </div>
                     <div className="flex w-[94vw] h-2/4 bg-white">
                       <div className="flex w-full h-full justify-start items-center border-[1px] border-slate-400 rounded-md overflow-x-auto whitespace-nowrap">
-                        {/* {images.map((i, index) => (
+                       {images.map((i, index) => (
                           <>
                             <div
                               className={`flex min-w-[230px] h-full flex-col text-center ${
@@ -641,16 +641,16 @@ export default function Home() {
                             </div>
                             
                           </>
-                          
-                        ))} */}
-<button
-                              className="bg-slate-200"
-                              onClick={() => {
-                                concluirBatalha();
-                              }}
-                            >
-                              Concluir batalha
-                            </button>
+
+                        ))} 
+                        {/* <button
+                          className="bg-slate-200"
+                          onClick={() => {
+                            concluirBatalha();
+                          }}
+                        >
+                          Concluir batalha
+                        </button> */}
                         {/* <button
                           className="bg-slate-200"
                           onClick={() => {
