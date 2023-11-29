@@ -238,33 +238,40 @@ export default function Home() {
                           <table className="table-auto">
                             <thead>
                               <tr className="bg-slate-300 h-[40px] text-center ">
-                                <th className="w-[200px] border-x-[1px] border-slate-400">
+                                <th className="w-[180px] border-x-[1px] border-slate-400">
                                   Holder
                                 </th>
-                                <th className="w-[200px] border-x-[1px] border-slate-400">
+                                <th className="w-[180px] border-x-[1px] border-slate-400">
                                   Descrição
                                 </th>
-                                <th className="w-[260px] border-x-[1px] border-slate-400">
+                                <th className="w-[180px] border-x-[1px] border-slate-400">
                                   X
                                 </th>
-                                <th className="w-[260px] border-x-[1px] border-slate-400">
+                                <th className="w-[180px] border-x-[1px] border-slate-400">
                                   Y
                                 </th>
-                                <th className="w-[200px] border-x-[1px] border-slate-400">
+                                <th className="w-[180px] border-x-[1px] border-slate-400">
                                   Ponto LED
                                 </th>
-                                <th className="w-[200px] border-x-[1px] border-slate-400">
+                                <th className="w-[180px] border-x-[1px] border-slate-400">
                                   Ponto Enclave
+                                </th>
+                                <th className="w-[180px] border-x-[1px] border-slate-400">
+                                  Imagem Conector
                                 </th>
                               </tr>
                             </thead>
                             <tbody className="bg-white h-[40px] text-center">
                               {g.led_pin.map((d, dindex) => (
                                 <>
-                                  <tr>
+                                  <tr className={`${
+                                dindex % 2 === 0
+                                  ? "bg-white"
+                                  : "bg-slate-200"
+                              }`}>
                                     <td className="border-x-[1px] border-slate-400">
                                       <input
-                                        className="text-center"
+                                        className="w-[100px] text-center"
                                         placeholder="Nome do holder..."
                                         onChange={(e) => {
                                           handleInputChange(
@@ -282,7 +289,7 @@ export default function Home() {
                                     <td className="border-x-[1px] border-slate-400">
                                       <input
                                         tabindex="-1"
-                                        className="text-center"
+                                        className="text-center w-[100px]"
                                         placeholder="Descrição..."
                                         onChange={(e) => {
                                           handleInputChange(
@@ -309,7 +316,7 @@ export default function Home() {
                                         }}
                                         name="x"
                                         value={g.x[dindex]}
-                                        className="text-center"
+                                        className="text-center w-[100px]"
                                         placeholder="Coordenada X batalha naval..."
                                       ></input>
                                     </td>
@@ -326,7 +333,7 @@ export default function Home() {
                                         }}
                                         name="y"
                                         value={g.y[dindex]}
-                                        className="text-center"
+                                        className="text-center w-[100px]"
                                         placeholder="Coordenada Y batalha naval..."
                                       ></input>
                                     </td>
@@ -343,7 +350,7 @@ export default function Home() {
                                         }}
                                         name="led_pin"
                                         value={d}
-                                        className="text-center"
+                                        className="text-center w-[100px]"
                                       ></input>
                                     </td>
                                     <td className="border-x-[1px] border-slate-400">
@@ -359,8 +366,22 @@ export default function Home() {
                                         }}
                                         name="enclave_pin"
                                         value={g.enclave_pin[dindex]}
-                                        className="text-center"
+                                        className="text-center w-[100px]"
                                       ></input>
+                                    </td>
+                                    <td className="border-x-[1px] border-slate-400">
+                                      <span>{g.c_src[dindex]}</span>
+                                      <input
+                                        type="file"
+                                        onChange={(e) =>
+                                          handleUpload(
+                                            e,
+                                            "giga",
+                                            g._id,
+                                            dindex
+                                          )
+                                        }
+                                      />
                                     </td>
                                   </tr>
                                 </>

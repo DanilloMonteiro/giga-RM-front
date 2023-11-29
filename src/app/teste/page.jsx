@@ -53,10 +53,13 @@ export default function Home() {
   const [testeGIGACopia, setTesteGIGACopia] = useState([]);
   const [maxItensGIGA, setMaxItensGIGA] = useState(256);
 
+  const [GIGA3, setGIGA3] = useState([])
+
   const [batalha, setBatalha] = useState([]);
 
   const [coordenadas, setCoordenadas] = useState([]);
   const [images, setImages] = useState([]);
+  const [images1, setImages1] = useState([]);
   const [laco, setLaco] = useState([]);
   const [coord, setCoord] = useState([]);
   const [bataIndex, setBataIndex] = useState([]);
@@ -167,11 +170,14 @@ export default function Home() {
         setREError(true);
         return;
       }
+
+      const response1 = await TesteServices.gigaFind("GIGA1");
       const response = await TesteServices.find(testeCode, re, update);
 
       console.log(response.data.status)
 
       if (response.data.status === "ok") {
+        const giga1 = [response1.data.giga];
         teste1 = [response.data.teste];
         setTesteCopia(...[teste1]);
         setTeste(...[teste1]);
@@ -197,11 +203,12 @@ export default function Home() {
               x: letra,
               y: j.toString(),
               status: null,
+              c_src: giga1.c_src
             });
           }
         }
 
-        carregarBatalha(tabela, coor);
+        carregarBatalha(tabela, coor, giga1);
 
         let images = [];
         let laco = [];
@@ -430,7 +437,7 @@ export default function Home() {
     }
   }
 
-  const carregarBatalha = async (table, coor) => {
+  const carregarBatalha = async (table, coor, giga) => {
     for (let i = 0; i < table.length; i++) {
       for (const item of coor) {
         if (table[i].co == item) {
@@ -438,6 +445,16 @@ export default function Home() {
             const newTeste = [...table]; // Clone o objeto teste[0]
 
             newTeste[i].status = true;
+            
+
+            return newTeste;
+          });
+          setImages1((prevTeste) => {
+            const newTeste = [...prevTeste]; // Clone o objeto teste[0]
+
+            console.log("aqui log", giga[0].c_src)
+
+            newTeste.push(giga[0].c_src[i])
 
             return newTeste;
           });
@@ -537,9 +554,12 @@ export default function Home() {
                    <span className="w-full h-4 text-red-500"></span>
                  </div>
 
-                 <div className="flexjustify-start mt-6">
+                 <div className="flex justify-between mt-6">
                    <button className="bg-blue-400 text-white font-semibold w-[200px] h-[40px] rounded-sm border-[2px] border-blue-400 hover:text-blue-400 hover:bg-white">
                      <Link href={`/create/test`}>Criar Teste GIGA</Link>
+                   </button>
+                   <button className="bg-blue-400 text-white font-semibold w-[200px] h-[40px] rounded-sm border-[2px] border-blue-400 hover:text-blue-400 hover:bg-white">
+                     <Link href={`/pontos`}>Descobrir pontos</Link>
                    </button>
                  </div>
                </div>
@@ -613,7 +633,7 @@ export default function Home() {
                     </div>
                     <div className="flex w-[94vw] h-2/4 bg-white">
                       <div className="flex w-full h-full justify-start items-center border-[1px] border-slate-400 rounded-md overflow-x-auto whitespace-nowrap">
-                       {images.map((i, index) => (
+                       {images1.map((i, index) => (
                           <>
                             <div
                               className={`flex min-w-[230px] h-full flex-col text-center ${
@@ -626,10 +646,7 @@ export default function Home() {
                                   : "bg-slate-300"
                               } `}
                             >
-                              <span className="flex justify-center mt-10">
-                                {laco[index]}
-                              </span>
-                              <span className="flex justify-center">
+                              <span className="flex justify-center my-4">
                                 Modulo {coord[index]}
                               </span>
                               <Image
@@ -643,14 +660,14 @@ export default function Home() {
                           </>
 
                         ))} 
-                        {/* <button
+                        <button
                           className="bg-slate-200"
                           onClick={() => {
                             concluirBatalha();
                           }}
                         >
                           Concluir batalha
-                        </button> */}
+                        </button>
                         {/* <button
                           className="bg-slate-200"
                           onClick={() => {

@@ -29,6 +29,6 @@
     ".next/types/**/*.ts",
     "src/app/teste/page.jsx",
     "src/app/create/test/page.jsx"
-  ],
+, "src/app/pontos/page.jsx"  ],
   "exclude": ["node_modules"]
 }

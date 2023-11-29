@@ -12,6 +12,8 @@ const TesteServices = {
   gigaUpdate: (id, params) => Api.put(`/GIGA/${id}`, params),
   testeGIGAUpdate: (id, params) => Api.put(`/GIGA/teste/${id}`, params),
   uploadImage: (formData) => Api.post(`/upload`, formData),
+  on: (status) => Api.get(`/on?status=${status}`),
+  off: (status) => Api.get(`/off?status=${status}`),
 };
 
 export default TesteServices;
