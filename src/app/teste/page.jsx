@@ -642,11 +642,7 @@ export default function Home() {
                                 batalha[bataIndex[index]].status == false
                                   ? "hidden"
                                   : "flex"
-                              } ${
-                                index % 2 === 0
-                                  ? "bg-slate-200"
-                                  : "bg-slate-300"
-                              } `}
+                              } bg-slate-200 border-[2px] rounded-lg border-slate-600`}
                             >
                               <span className="flex justify-center my-4">
                                 Modulo {coord[index]}
