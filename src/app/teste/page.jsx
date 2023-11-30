@@ -21,7 +21,7 @@ export default function Home() {
 
   const [update, setUpdate] = useState(false)
 
-  const [isTesteOk, setTesteOk] = useState("ok");
+  const [isTesteOk, setTesteOk] = useState("Testando");
   const [placa, setPlacas] = useState("")
 
   const [reprovados, setReprovados] = useState(0);
@@ -76,14 +76,7 @@ export default function Home() {
     setREError(false);
   };
 
-  const ativarFuncao = () => {
-    setTesteOk("Testando");
-
-    // Redefine para vermelho após 5 segundos
-    setTimeout(() => {
-      setTesteOk("Parado");
-    }, 5000);
-  };
+  
 
   const handleCheckboxChange = () => {
     setUpdate(!update); // Inverte o valor do estado ao clicar no checkbox
@@ -302,21 +295,25 @@ export default function Home() {
       : ((maxItens - teste[0].outputs.length) / maxItensGIGA) * 100; // Defina MAX_ITEMS como o tamanho máximo do array
 
   function TesteFunction(data) {
-    // console.log(data);
+    console.log(data);
     if (teste != []) {
       if (data[0] == 0) {
         // for (let i = 1; i < data.length; i++) {
         const indexTira = teste[0].inputs.indexOf(parseInt(data[1]));
+        const indexTira1 = teste[0].outputs.indexOf(parseInt(data[2]));
         if (indexTira != -1) {
           setTeste((prevTeste) => {
             const newTeste = { ...prevTeste[0] }; // Clone o objeto teste[0]
 
             // Use o método filter para criar novos arrays que excluem o elemento específico
             newTeste.outputs = newTeste.outputs.filter(
-              (element, i) => i !== indexTira
+              (element, i) => i !== indexTira1
             );
             newTeste.outputs_desc = newTeste.outputs_desc.filter(
-              (element, i) => i !== indexTira
+              (element, i) => i !== indexTira1
+            );
+            newTeste.outputs_c = newTeste.outputs_desc.filter(
+              (element, i) => i !== indexTira1
             );
             newTeste.inputs = newTeste.inputs.filter(
               (element, i) => i !== indexTira
@@ -324,9 +321,15 @@ export default function Home() {
             newTeste.inputs_desc = newTeste.inputs_desc.filter(
               (element, i) => i !== indexTira
             );
+            newTeste.inputs_c = newTeste.inputs_desc.filter(
+              (element, i) => i !== indexTira
+            );
 
+            console.log(newTeste)
             return [newTeste];
           });
+
+
         } else {
           // Atualize o estado do 'teste' usando setTeste
           return;
@@ -339,6 +342,7 @@ export default function Home() {
           const objetoEncontrado = newTeste.inputs.indexOf(data[datatama - 2]);
           if (objetoEncontrado != -1) {
             newTeste.outputs_desc[objetoEncontrado].error = data[datatama - 1];
+
             return [newTeste];
           } else {
             return [newTeste];
@@ -473,8 +477,6 @@ export default function Home() {
     socket.on("modificacao", (data) => {
       TesteFunction(data);
     });
-
-    ativarFuncao()
 
     return () => {
       socket.off("modificacao");
@@ -850,10 +852,22 @@ export default function Home() {
                       <div className="flex flex-col w-full h-full justify-center items-center bg-slate-200">
                         <div className="flex w-full h-full bg-white">
                           <div className="flex w-1/2 h-full justify-center items-center border-[1px] border-slate-400 rounded-md">
-                            <h1>Imagem do conector</h1>
+                            {teste[0].outputs_c[0].c_src && (
+                              <Image
+                                  src={`/${teste[0].outputs_c[0].c_src}`}
+                                  width={400}
+                                  height={400}
+                                  alt="Picture of the author"
+                              />)}
                           </div>
                           <div className="flex w-1/2 h-full justify-center items-center border-[1px] border-slate-400 rounded-md">
-                            <h1>Imagem do conector</h1>
+                            {teste[0].inputs_c[0].c_src && (
+                              <Image
+                                  src={`/${teste[0].inputs_c[0].c_src}`}
+                                  width={400}
+                                  height={400}
+                                  alt="Picture of the author"
+                              />)}
                           </div>
                         </div>
                       </div>
