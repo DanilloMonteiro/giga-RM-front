@@ -230,7 +230,8 @@ export default function Home() {
             }
           }
         }
-        console.log("imagessssssssssssssss", teste1);
+        console.log("imagessssssssssssssss", tabela);
+        console.log("imagessssssssssssssss2", images);
 
         setBataIndex(index11);
         setCoord(coord);
@@ -251,7 +252,6 @@ export default function Home() {
       console.error("Erro ao buscar dados do teste:", error);
       setCarregado(false); // Define carregado como false em caso de erro
     }
-    console.log(teste1, teste2);
   }
 
 
@@ -301,6 +301,7 @@ export default function Home() {
         // for (let i = 1; i < data.length; i++) {
         const indexTira = teste[0].inputs.indexOf(parseInt(data[1]));
         const indexTira1 = teste[0].outputs.indexOf(parseInt(data[2]));
+        console.log(indexTira, indexTira1)
         if (indexTira != -1) {
           setTeste((prevTeste) => {
             const newTeste = { ...prevTeste[0] }; // Clone o objeto teste[0]
@@ -312,7 +313,7 @@ export default function Home() {
             newTeste.outputs_desc = newTeste.outputs_desc.filter(
               (element, i) => i !== indexTira1
             );
-            newTeste.outputs_c = newTeste.outputs_desc.filter(
+            newTeste.outputs_c = newTeste.outputs_c.filter(
               (element, i) => i !== indexTira1
             );
             newTeste.inputs = newTeste.inputs.filter(
@@ -321,7 +322,7 @@ export default function Home() {
             newTeste.inputs_desc = newTeste.inputs_desc.filter(
               (element, i) => i !== indexTira
             );
-            newTeste.inputs_c = newTeste.inputs_desc.filter(
+            newTeste.inputs_c = newTeste.inputs_c.filter(
               (element, i) => i !== indexTira
             );
 
@@ -445,6 +446,7 @@ export default function Home() {
     for (let i = 0; i < table.length; i++) {
       for (const item of coor) {
         if (table[i].co == item) {
+          console.log("deu certo", table[i].co, item)
           setBatalha(() => {
             const newTeste = [...table]; // Clone o objeto teste[0]
 
@@ -456,9 +458,9 @@ export default function Home() {
           setImages1((prevTeste) => {
             const newTeste = [...prevTeste]; // Clone o objeto teste[0]
 
-            console.log("aqui log", giga[0].c_src)
+            console.log("images1", newTeste)
 
-            newTeste.push(giga[0].c_src[i])
+            newTeste.push([giga[0].c_src[i], item])
 
             return newTeste;
           });
@@ -645,18 +647,16 @@ export default function Home() {
                               } bg-slate-200 border-[2px] rounded-lg border-slate-600`}
                             >
                               <span className="flex justify-center my-4">
-                                Modulo {coord[index]}
+                                Modulo {i[1]}{coord[index]}
                               </span>
                               <Image
-                                src={`/${i}`}
+                                src={`/${i[0]}`}
                                 width={1000}
                                 height={500}
                                 alt="Picture of the author"
                               />
                             </div>
-                            
                           </>
-
                         ))} 
                         <button
                           className="bg-slate-200"
@@ -849,12 +849,14 @@ export default function Home() {
                         <div className="flex w-full h-full bg-white">
                           <div className="flex w-1/2 h-full justify-center items-center border-[1px] border-slate-400 rounded-md">
                             {teste[0].outputs_c[0].c_src && (
-                              <Image
-                                  src={`/${teste[0].outputs_c[0].c_src}`}
-                                  width={400}
-                                  height={400}
-                                  alt="Picture of the author"
-                              />)}
+                              <>
+                                <Image
+                                    src={`/${teste[0].outputs_c[0].c_src}`}
+                                    width={400}
+                                    height={400}
+                                    alt="Picture of the author"
+                                />
+                              </>)}
                           </div>
                           <div className="flex w-1/2 h-full justify-center items-center border-[1px] border-slate-400 rounded-md">
                             {teste[0].inputs_c[0].c_src && (
