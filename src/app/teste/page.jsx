@@ -186,7 +186,7 @@ export default function Home() {
 
         setMaxItens(teste1[0].outputs.length);
 
-        for (let i = 0; i < letras.length; i++) {
+        for (let i = 0, n = 0; i < letras.length; i++, n + 116) {
           const letra = letras[i];
 
           for (let j = 1; j <= numColunas; j++) {
@@ -196,7 +196,7 @@ export default function Home() {
               x: letra,
               y: j.toString(),
               status: null,
-              c_src: giga1.c_src
+              c_src: giga1[0].c_src[n + j - 1]
             });
           }
         }
@@ -209,10 +209,8 @@ export default function Home() {
         let index11 = [];
 
         for (let i = 0; i < teste1[0].outputs_c.length; i++) {
-          images.push(teste1[0].outputs_c[i].c_src);
           laco.push(`Saída ${teste1[0].outputs[i]}`);
           coord.push(teste1[0].outputs_c[i].c_name);
-          images.push(teste1[0].inputs_c[i].c_src);
           laco.push(`Entrada ${teste1[0].inputs[i]}`);
           coord.push(teste1[0].inputs_c[i].c_name);
 
@@ -230,8 +228,6 @@ export default function Home() {
             }
           }
         }
-        console.log("imagessssssssssssssss", tabela);
-        console.log("imagessssssssssssssss2", images);
 
         setBataIndex(index11);
         setCoord(coord);
@@ -446,21 +442,12 @@ export default function Home() {
     for (let i = 0; i < table.length; i++) {
       for (const item of coor) {
         if (table[i].co == item) {
-          console.log("deu certo", table[i].co, item)
+          console.log("deu certo", table)
           setBatalha(() => {
             const newTeste = [...table]; // Clone o objeto teste[0]
 
             newTeste[i].status = true;
             
-
-            return newTeste;
-          });
-          setImages1((prevTeste) => {
-            const newTeste = [...prevTeste]; // Clone o objeto teste[0]
-
-            console.log("images1", newTeste)
-
-            newTeste.push([giga[0].c_src[i], item])
 
             return newTeste;
           });
@@ -637,20 +624,20 @@ export default function Home() {
                     </div>
                     <div className="flex w-[94vw] h-2/4 bg-white">
                       <div className="flex w-full h-full justify-start items-center border-[1px] border-slate-400 rounded-md overflow-x-auto whitespace-nowrap">
-                       {images1.map((i, index) => (
+                       {batalha.map((i, index) => (
                           <>
                             <div
                               className={`flex min-w-[230px] h-full flex-col text-center ${
-                                batalha[bataIndex[index]].status == false
+                                i.status == false || i.status == null
                                   ? "hidden"
                                   : "flex"
                               } bg-slate-200 border-[2px] rounded-lg border-slate-600`}
                             >
                               <span className="flex justify-center my-4">
-                                Modulo {i[1]}{coord[index]}
+                                Modulo {i.co} {`${i.status}`}
                               </span>
                               <Image
-                                src={`/${i[0]}`}
+                                src={`/${i.c_src}`}
                                 width={1000}
                                 height={500}
                                 alt="Picture of the author"
@@ -666,26 +653,7 @@ export default function Home() {
                         >
                           Concluir batalha
                         </button>
-                        {/* <button
-                          className="bg-slate-200"
-                          onClick={() => {
-                            carregarBatalha();
-                          }}
-                        >
-                          Carregar batalha
-                        </button> */}
                       </div>
-                      {/* <div className="flex w-1/2 h-full justify-center items-center border-[1px] border-slate-400 rounded-md">
-                        <h1>Imagem do conector</h1>
-                        <button
-                          className="bg-slate-200"
-                          onClick={() => {
-                            concluirBatalha();
-                          }}
-                        >
-                          Concluir batalha
-                        </button>
-                      </div> */}
                     </div>
                   </>
                 )}

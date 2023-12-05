@@ -27,7 +27,7 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "src/app/teste/page.jsx",
+    "src/app/teste/page.jsx batalha unica",
     "src/app/create/test/page.jsx"
 , "src/app/pontos/page.jsx"  ],
   "exclude": ["node_modules"]
