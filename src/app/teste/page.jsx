@@ -76,8 +76,6 @@ export default function Home() {
     setREError(false);
   };
 
-  
-
   const handleCheckboxChange = () => {
     setUpdate(!update); // Inverte o valor do estado ao clicar no checkbox
   };
@@ -132,6 +130,7 @@ export default function Home() {
 
       setReprovado(true);
       setTimeout(() => {
+        Reiniciar()
         setReprovado(false);
       }, 3000);
     } catch (error) {
@@ -148,7 +147,9 @@ export default function Home() {
       const response = await TesteServices.aprove();
 
       setAprovado(true);
+     
       setTimeout(() => {
+        Reiniciar()
         setAprovado(false);
       }, 3000);
     } catch (error) {
