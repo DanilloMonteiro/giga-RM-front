@@ -27,8 +27,11 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "src/app/teste/page.jsx batalha unica",
-    "src/app/create/test/page.jsx"
-, "src/app/pontos/page.jsx"  ],
+    "src/app/test/page.jsx batalha unica",
+    "src/app/ChangeCodeGIGA/page.jsx",
+    "src/app/pontos/page.jsx",
+    "src/app/page.jsx",
+    "src/app/test/layout.jsx"
+  ],
   "exclude": ["node_modules"]
 }
