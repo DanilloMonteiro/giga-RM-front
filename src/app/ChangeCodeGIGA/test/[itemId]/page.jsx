@@ -13,6 +13,7 @@ export default function Page({ params }) {
   const [actualURL, setActualURL] = useState("edited-1703615165629");
   const [oldURL, setOldURL] = useState("");
   const [index, setIndex] = useState([100000, ""]);
+  const [circle, setCircle] = useState(5);
 
   let imageDataURL;
 
@@ -29,6 +30,10 @@ export default function Page({ params }) {
 
     setTest(newDados);
   };
+
+  function handleCircleChange(value) {
+    setCircle(value);
+  }
 
   function handleColorChange(color) {
     console.log(color);
@@ -63,7 +68,11 @@ export default function Page({ params }) {
         data.append("index", index);
         data.append("type", type);
 
-        await Api.post("/uploads", data).then(fetchTest());
+        await Api.post("/uploads", data).then(
+          setTimeout(function () {
+            fetchTest();
+          }, 1000)
+        );
       } catch (error) {
         console.error("Erro de rede:", error);
       }
@@ -90,8 +99,10 @@ export default function Page({ params }) {
 
         if (index[0] !== 100000) {
           if (index[1] == "out") {
+            setOldURL(test[0].outputs_c[index[0]].c_src);
             setActualURL(test[0].outputs_c[index[0]].c_src);
           } else {
+            setOldURL(test[0].outputs_c[index[0]].c_src);
             setActualURL(test[0].inputs_c[index[0]].c_src);
           }
         }
@@ -107,17 +118,15 @@ export default function Page({ params }) {
   const drawPoint = (context, x, y) => {
     context.fillStyle = color;
     context.beginPath();
-    context.arc(x, y, 5, 0, 2 * Math.PI);
+    context.arc(x, y, circle, 0, 4 * Math.PI);
     context.fill();
   };
 
   const saveImageOnServer = async (imageDataURL) => {
-    if (
-      actualURL == undefined &&
-      test[0].outputs_desc[index].desc.startsWith("PRESENCA")
-    ) {
-      return;
-    }
+    // const desc = test[0].outputs_desc[index[0]].desc;
+    // if (actualURL == undefined || desc.startsWith("PRESENCA")) {
+    //   return;
+    // }
 
     console.log("save image on server");
     // Send the edited image data to the server
@@ -206,7 +215,7 @@ export default function Page({ params }) {
     <div className="flex w-full h-full">
       <div className="flex w-full h-full">
         <div className="flex w-screen h-screen bg-blue-400 justify-center items-center">
-          <div className="flex flex-col static w-[95vw] h-[95vh] bg-white rounded-xl drop-shadow-lg px-7 py-3">
+          <div className="flex flex-col static w-[95vw] h-[95vh] bg-white rounded-xl drop-shadow-lg px-3 py-3">
             <div className="flex p-3 bg-slate-200 rounded-t-xl">
               {test.map((g, gindex) => (
                 <>
@@ -224,7 +233,7 @@ export default function Page({ params }) {
                         </>
                       )}
                     </div>
-                    <div className="flex flex-col w-1/2 h-auto gap-5 bg-blue-200 p-3">
+                    <div className="flex flex-col w-1/2 h-auto gap-3 bg-blue-200 p-3">
                       <h1 className="w-full h-auto text-2xl pt-1">
                         Marcar ponto no conector
                       </h1>
@@ -232,9 +241,35 @@ export default function Page({ params }) {
                         <p>Cor:</p>
                         <input
                           type="color"
-                          defaultValue={"#FF0000"}
+                          defaultValue={color}
                           onChange={(e) => handleColorChange(e.target.value)}
                         ></input>
+                      </div>
+                      <div className="flex gap-3">
+                        <p>Tamanho:</p>
+                        <div className="flex gap-2">
+                          <label>P</label>
+                          <input
+                            type="radio"
+                            value={5}
+                            checked={circle === 5}
+                            onChange={() => handleCircleChange(5)}
+                          ></input>
+                          <label>M</label>
+                          <input
+                            type="radio"
+                            value={10}
+                            checked={circle === 10}
+                            onChange={() => handleCircleChange(10)}
+                          ></input>
+                          <label>G</label>
+                          <input
+                            type="radio"
+                            value={15}
+                            checked={circle === 15}
+                            onChange={() => handleCircleChange(15)}
+                          ></input>
+                        </div>
                       </div>
                       <div className="flex gap-3">
                         <p>Ponto:</p>
@@ -277,7 +312,7 @@ export default function Page({ params }) {
                 onClick={() => {}}
               />
             </div>
-            <div className="flex flex-col p-2 gap-3 w-full h-full bg-slate-200 rounded-b-md overflow-auto overscroll-x-contain overscroll-y-contain">
+            <div className="flex flex-col  gap-3 w-full h-full bg-slate-200 rounded-b-md overflow-auto overscroll-x-contain overscroll-y-contain">
               {test.map((g, gindex) => (
                 <>
                   <table className="table-auto">
@@ -332,33 +367,65 @@ export default function Page({ params }) {
                             <td className="border-x-[1px] border-slate-400">
                               {isLock(g.outputs_desc[dindex].desc) == false && (
                                 <>
-                                  <span>{g.outputs_c[dindex]?.c_src}</span>
-                                  <button
-                                    onClick={() => {
-                                      setPhoto(
-                                        g.outputs_c[dindex].c_src,
-                                        dindex,
-                                        "out"
-                                      );
-                                    }}
-                                    className="bg-slate-300 px-2 hover:text-white hover:bg-slate-600"
-                                  >
-                                    Selecionar imagem
-                                  </button>
-                                  <button
-                                    onClick={() => {
-                                      handleSave(1);
-                                    }}
-                                    className="bg-slate-300 px-2 mx-2 hover:text-white hover:bg-slate-600"
-                                  >
-                                    R
-                                  </button>
+                                  <div className="flex flex-col">
+                                    <div className="flex">
+                                      {g.outputs_c[dindex].c_src && (
+                                        <span className="flex w-full text-center justify-center bg-green-300">
+                                          {g.outputs_c[dindex]?.c_src}
+                                        </span>
+                                      )}
+                                      {!g.outputs_c[dindex].c_src && (
+                                        <span className="flex w-full text-center bg-red-300 justify-center">
+                                          Sem imagem
+                                        </span>
+                                      )}
+                                    </div>
+                                    <div>
+                                      <button
+                                        onClick={() => {
+                                          setPhoto(
+                                            g.outputs_c[dindex].c_src,
+                                            dindex,
+                                            "out"
+                                          );
+                                        }}
+                                        className="bg-slate-300 px-2 hover:text-white hover:bg-slate-600"
+                                      >
+                                        Selecionar imagem
+                                      </button>
+                                    </div>
+                                    <div>
+                                      <input
+                                        type="file"
+                                        className="w-[135px]"
+                                        onChange={(e) =>
+                                          handleUpload(e, "out", g._id, dindex)
+                                        }
+                                      />
+                                      <button
+                                        onClick={() => {
+                                          handleSave(1);
+                                        }}
+                                        className="bg-slate-300 px-2 mx-2 hover:text-white hover:bg-slate-600"
+                                      >
+                                        R
+                                      </button>
+                                    </div>
+                                  </div>
                                 </>
                               )}
                               {isLock(g.outputs_desc[dindex].desc) == true && (
                                 <>
-                                  <p>{g.outputs_c[dindex].c_src}</p>
-
+                                  {g.outputs_c[dindex].c_src && (
+                                    <span className="flex w-full text-center justify-center bg-green-300">
+                                      {g.outputs_c[dindex]?.c_src}
+                                    </span>
+                                  )}
+                                  {!g.outputs_c[dindex].c_src && (
+                                    <span className="flex w-full text-center bg-red-300 justify-center">
+                                      Sem imagem
+                                    </span>
+                                  )}
                                   <input
                                     type="file"
                                     className="w-[135px]"
@@ -371,10 +438,10 @@ export default function Page({ params }) {
                                       setPhoto(
                                         g.outputs_c[dindex].c_src,
                                         dindex,
-                                        "in"
+                                        "out"
                                       );
                                     }}
-                                    className="bg-gray-200 rounded-sm border-[1px] border-slate-800 px-2 hover:text-white hover:bg-slate-600"
+                                    className="bg-gray-200 mx-2 rounded-sm border-[1px] border-slate-800 px-2 hover:text-white hover:bg-slate-600"
                                   >
                                     V
                                   </button>
@@ -405,33 +472,65 @@ export default function Page({ params }) {
                             <td className="border-x-[1px] border-slate-400">
                               {isLock(g.outputs_desc[dindex].desc) == false && (
                                 <>
-                                  <span>{g.inputs_c[dindex]?.c_src}</span>
-                                  <button
-                                    onClick={() => {
-                                      setPhoto(
-                                        g.inputs_c[dindex].c_src,
-                                        dindex,
-                                        "in"
-                                      );
-                                    }}
-                                    className="bg-slate-300 px-2 hover:text-white hover:bg-slate-600"
-                                  >
-                                    Selecionar imagem
-                                  </button>
-                                  <button
-                                    onClick={() => {
-                                      handleSave(1);
-                                    }}
-                                    className="bg-slate-300 px-2 mx-2 hover:text-white hover:bg-slate-600"
-                                  >
-                                    R
-                                  </button>
+                                  <div className="flex flex-col">
+                                    <div className="flex">
+                                      {g.inputs_c[dindex].c_src && (
+                                        <span className="flex w-full text-center justify-center bg-green-300">
+                                          {g.inputs_c[dindex]?.c_src}
+                                        </span>
+                                      )}
+                                      {!g.inputs_c[dindex].c_src && (
+                                        <span className="flex w-full text-center bg-red-300 justify-center">
+                                          Sem imagem
+                                        </span>
+                                      )}
+                                    </div>
+                                    <div>
+                                      <button
+                                        onClick={() => {
+                                          setPhoto(
+                                            g.inputs_c[dindex].c_src,
+                                            dindex,
+                                            "in"
+                                          );
+                                        }}
+                                        className="bg-slate-300 px-2 hover:text-white hover:bg-slate-600"
+                                      >
+                                        Selecionar imagem
+                                      </button>
+                                    </div>
+                                    <div>
+                                      <input
+                                        type="file"
+                                        className="w-[135px]"
+                                        onChange={(e) =>
+                                          handleUpload(e, "in", g._id, dindex)
+                                        }
+                                      />
+                                      <button
+                                        onClick={() => {
+                                          handleSave(1);
+                                        }}
+                                        className="bg-slate-300 px-2 mx-2 hover:text-white hover:bg-slate-600"
+                                      >
+                                        R
+                                      </button>
+                                    </div>
+                                  </div>
                                 </>
                               )}
                               {isLock(g.outputs_desc[dindex].desc) == true && (
                                 <>
-                                  <p>{g.inputs_c[dindex].c_src}</p>
-
+                                  {g.inputs_c[dindex].c_src && (
+                                    <span className="flex w-full text-center justify-center bg-green-300">
+                                      {g.inputs_c[dindex]?.c_src}
+                                    </span>
+                                  )}
+                                  {!g.inputs_c[dindex].c_src && (
+                                    <span className="flex w-full text-center bg-red-300 justify-center">
+                                      Sem imagem
+                                    </span>
+                                  )}
                                   <input
                                     type="file"
                                     className="w-[135px]"
@@ -447,7 +546,7 @@ export default function Page({ params }) {
                                         "in"
                                       );
                                     }}
-                                    className="bg-gray-200 rounded-sm border-[1px] border-slate-800 px-2 hover:text-white hover:bg-slate-600"
+                                    className="bg-gray-200 mx-2 rounded-sm border-[1px] border-slate-800 px-2 hover:text-white hover:bg-slate-600"
                                   >
                                     V
                                   </button>

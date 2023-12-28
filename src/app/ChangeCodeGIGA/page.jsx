@@ -6,12 +6,13 @@ import GigaServices from "../../../services/giga";
 import Link from "next/link";
 import { X } from "@phosphor-icons/react";
 import { useRouter } from "next/navigation";
+import { SyncLoader } from "react-spinners";
 
 export default function Home() {
   const router = useRouter();
 
   const [testes, setTestes] = useState([]);
-
+  const [looding, setLooding] = useState(true);
   const [GIGAS, setGIGAS] = useState([]);
 
   async function fetchTestes() {
@@ -20,6 +21,8 @@ export default function Home() {
 
     const response2 = await GigaServices.index();
     setGIGAS(response2.data);
+
+    setLooding(false);
   }
 
   useEffect(() => {
@@ -88,6 +91,15 @@ export default function Home() {
           </div>
         </div>
       </div>
+      {looding && (
+        <>
+          <div className="flex absolute bg-slate-500 w-full h-full top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-50"></div>
+          <div className="flex flex-col gap-10 absolute w-[35%] h-[35%] justify-center items-center bg-white top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-xl">
+            <h1 className="text-blue-500 text-4xl">Carregando...</h1>
+            <SyncLoader color="#3b82f6" loading={true} size={30} />
+          </div>
+        </>
+      )}
     </div>
   );
 }

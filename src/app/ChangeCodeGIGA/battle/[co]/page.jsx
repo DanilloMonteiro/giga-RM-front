@@ -7,6 +7,7 @@ import GigaServices from "../../../../../services/giga";
 import { X } from "@phosphor-icons/react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { SyncLoader } from "react-spinners";
 
 export default function Page({ params }) {
   const router = useRouter();
@@ -21,9 +22,10 @@ export default function Page({ params }) {
   const [giga, setGiga] = useState([]);
   const [index, setIndex] = useState();
   const [points, setPoints] = useState([]);
+  const [looding, setLooding] = useState(true);
 
   async function fetchGIGA() {
-    const response = await GigaServices.findById("658acb15db2362bedce90081");
+    const response = await GigaServices.findById("658d7f2c90206835142834dd");
 
     if (response.statusText === "OK") {
       const giga = [response.data];
@@ -37,6 +39,7 @@ export default function Page({ params }) {
       console.log(index);
       setIndex(index);
       setPoints([giga[0].holder[index].points]);
+      setLooding(false);
     }
   }
 
@@ -56,7 +59,11 @@ export default function Page({ params }) {
         data.append("idConector", idConector);
         data.append("type", type);
 
-        Api.post("/uploads/giga", data);
+        await Api.post("/uploads/giga", data).then(
+          setTimeout(function () {
+            fetchGIGA();
+          }, 1000)
+        );
       } catch (error) {
         console.error("Erro de rede:", error);
       }
@@ -118,7 +125,7 @@ export default function Page({ params }) {
           <div className="flex flex-col static w-[97vw] h-[95vh] bg-white rounded-xl drop-shadow-lg px-5 py-3">
             <div className="flex flex-col w-full gap-4 h-full">
               <div className="flex w-full h-auto">
-                {giga && index && (
+                {giga && index >= 0 && (
                   <h1 className="text-3xl font-semibold">
                     {`Holder: ${giga?.holder[index].name}`}
                   </h1>
@@ -184,7 +191,7 @@ export default function Page({ params }) {
                           type="file"
                           onChange={(e) => handleUpload(e, "battle", index)}
                         ></input>
-                        {giga && index && (
+                        {giga && index >= 0 && (
                           <Image
                             src={`/default/${giga.holder[index].battle_src}`}
                             width={300}
@@ -201,7 +208,7 @@ export default function Page({ params }) {
                           type="file"
                           onChange={(e) => handleUpload(e, "connector", index)}
                         ></input>
-                        {giga && index && (
+                        {giga && index >= 0 && (
                           <Image
                             src={`/default/${giga.holder[index].connector_src}`}
                             width={300}
@@ -235,7 +242,7 @@ export default function Page({ params }) {
             />
           </div>
           <div className="flex flex-col w-full h-full p-3">
-            <div className="flex w-full h-auto gap-5 bg-slate-100">
+            <div className="flex w-full h-auto  gap-5 bg-slate-100">
               <label className="flex bg-slate-200 w-auto h-auto px-3">
                 Tipo do ponto:
               </label>
@@ -420,6 +427,15 @@ export default function Page({ params }) {
             </button>
           </div>
         </div>
+      )}
+      {looding && (
+        <>
+          <div className="flex absolute bg-slate-500 w-full h-full top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-50"></div>
+          <div className="flex flex-col gap-10 absolute w-[35%] h-[35%] justify-center items-center bg-white top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-xl">
+            <h1 className="text-blue-500 text-4xl">Carregando...</h1>
+            <SyncLoader color="#3b82f6" loading={true} size={30} />
+          </div>
+        </>
       )}
     </div>
   );

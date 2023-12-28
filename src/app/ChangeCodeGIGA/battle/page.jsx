@@ -5,10 +5,12 @@ import { X } from "@phosphor-icons/react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import GigaServices from "../../../../services/giga";
+import { SyncLoader } from "react-spinners";
 
 export default function Page({ params }) {
   const router = useRouter();
 
+  const [looding, setLooding] = useState(true);
   const [fields, setFields] = useState([
     ["LED", 1, 1232],
     ["ENCLAVE", 1, 0],
@@ -29,12 +31,13 @@ export default function Page({ params }) {
   );
 
   async function fetchGIGA() {
-    const response = await GigaServices.findById("658acb15db2362bedce90081");
+    const response = await GigaServices.findById("658d7f2c90206835142834dd");
 
     if (response.statusText === "OK") {
       const giga = [response.data];
       console.log(...giga);
       setGiga(...giga);
+      setLooding(false);
     }
   }
 
@@ -218,7 +221,7 @@ export default function Page({ params }) {
                     <p>Pontos</p>
                   </div>
                   {hoveredItem[1]?.map((h, hindex) => (
-                    <div className="flex flex-col w-full h-[10%]">
+                    <div key={hindex} className="flex flex-col w-full h-[10%]">
                       <div
                         className={`flex w-full h-auto px-2 ${
                           hindex % 2 == 0 ? "bg-white" : "bg-slate-200"
@@ -249,6 +252,15 @@ export default function Page({ params }) {
           </div>
         </div>
       </div>
+      {looding && (
+        <>
+          <div className="flex absolute bg-slate-500 w-full h-full top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-50"></div>
+          <div className="flex flex-col gap-10 absolute w-[35%] h-[35%] justify-center items-center bg-white top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-xl">
+            <h1 className="text-blue-500 text-4xl">Carregando...</h1>
+            <SyncLoader color="#3b82f6" loading={true} size={30} />
+          </div>
+        </>
+      )}
     </div>
   );
 }

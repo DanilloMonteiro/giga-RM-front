@@ -206,7 +206,10 @@ export default function Home({ params }) {
       <div className="flex w-screen h-screen bg-blue-400 justify-center items-center">
         <div className="flex static w-[97vw] h-[94vh] gap-10 bg-white rounded-xl drop-shadow-lg p-7">
           {test.map((t, testIndex) => (
-            <div className="flex flex-col w-full h-full justify-start items-start bg-slate-200">
+            <div
+              key={testIndex}
+              className="flex flex-col w-full h-full justify-start items-start bg-slate-200"
+            >
               <div className="flex flex-row w-full h-2/4 mr-10 gap-5 bg-white">
                 <div className="flex flex-col w-full h-full bg-slate-400 gap-2 p-2 rounded-2xl ">
                   <div className="flex flex-col w-full h-auto gap-4 mb-2">
