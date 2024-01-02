@@ -10,13 +10,14 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import FunctionServices from "../../../../../services/function";
 
-const socket = io("http://localhost:3001");
+const socket = io("http://localhost:3003");
 
 export default function Home({ params }) {
   const router = useRouter();
 
   const [isTestOk, setTestOk] = useState("Testando");
   const [board, setboard] = useState("");
+  const [cooldownButton, setCooldownButton] = useState(false);
 
   const [reprove, setReprove] = useState(0);
   const [aprove, setAprove] = useState(0);
@@ -67,6 +68,10 @@ export default function Home({ params }) {
   async function Reiniciar() {
     // await FunctionServices.stop();
     router.push(`/test`);
+    setCooldownButton(true);
+    setTimeout(function () {
+      setCooldownButton(false);
+    }, 3000);
   }
 
   const progress =
@@ -316,7 +321,12 @@ export default function Home({ params }) {
                         onClick={() => {
                           Reiniciar();
                         }}
-                        className="w-[150px] h-[80px] sm:w-[80px] sm:text-sm rounded-md text-2xl bg-blue-400 hover:bg-white hover:text-blue-400 text-white font-bold border-[2px] border-blue-400"
+                        className={`w-[150px] h-[80px] sm:w-[80px] sm:text-sm rounded-md text-2xl  font-bold border-[2px] ${
+                          cooldownButton == true
+                            ? "bg-slate-500 border-slate-500 text-white"
+                            : " bg-blue-400 hover:bg-white hover:text-blue-400 text-white border-blue-400 "
+                        }`}
+                        disabled={cooldownButton}
                       >
                         Setup
                       </button>

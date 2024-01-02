@@ -132,7 +132,7 @@ export default function Page({ params }) {
     // Send the edited image data to the server
     try {
       console.log("Before fetch");
-      const response = await fetch("http://localhost:3001/uploads/test", {
+      const response = await fetch("http://localhost:3003/uploads/test", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -179,9 +179,9 @@ export default function Page({ params }) {
     const { image } = canvasStateRef.current;
 
     if (actualURL == undefined) {
-      image.src = `/default/semimagem.png`;
+      image.src = `http://172.29.14.151:3000/default/semimagem.png`;
     } else {
-      image.src = `/default/${actualURL}`;
+      image.src = `http://172.29.14.151:3000/default/${actualURL}`;
     }
 
     image.onload = function () {

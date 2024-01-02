@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import GigaServices from "../../../../../services/giga";
 
-const socket = io("http://localhost:3001");
+const socket = io("http://localhost:3003");
 
 export default function Home({ params }) {
   const router = useRouter();
@@ -24,7 +24,7 @@ export default function Home({ params }) {
   async function fetchTest(testeCode, re, update) {
     try {
       const responseGiga = await GigaServices.findById(
-        "658d7f2c90206835142834dd"
+        "658dd6f47564a75d552f7cf3"
       );
       const responseTest = await TestServices.find(
         params.productCode,

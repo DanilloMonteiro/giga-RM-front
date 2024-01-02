@@ -31,7 +31,7 @@ export default function Page({ params }) {
   );
 
   async function fetchGIGA() {
-    const response = await GigaServices.findById("658d7f2c90206835142834dd");
+    const response = await GigaServices.findById("658dd6f47564a75d552f7cf3");
 
     if (response.statusText === "OK") {
       const giga = [response.data];

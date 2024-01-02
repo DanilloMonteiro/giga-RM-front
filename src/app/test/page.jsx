@@ -7,7 +7,7 @@ import Link from "next/link";
 import Image from "next/image";
 import TestServices from "../../../services/test";
 
-const socket = io("http://localhost:3001");
+const socket = io("http://localhost:3003");
 
 export default function Home() {
   const router = useRouter();
