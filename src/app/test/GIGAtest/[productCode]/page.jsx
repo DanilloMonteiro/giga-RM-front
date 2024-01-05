@@ -10,7 +10,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import FunctionServices from "../../../../../services/function";
 
-const socket = io("http://localhost:3003");
+const socket = io("http://localhost:3001");
 
 export default function Home({ params }) {
   const router = useRouter();

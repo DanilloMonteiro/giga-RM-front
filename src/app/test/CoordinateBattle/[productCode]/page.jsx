@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import GigaServices from "../../../../../services/giga";
 
-const socket = io("http://localhost:3003");
+const socket = io("http://localhost:3001");
 
 export default function Home({ params }) {
   const router = useRouter();
@@ -120,7 +120,7 @@ export default function Home({ params }) {
               setGiga((prevTeste) => {
                 const newTeste = { ...prevTeste };
 
-                newTeste.holder[i].status = "in";
+                newTeste.holder[i].status = "out";
 
                 return newTeste;
               });

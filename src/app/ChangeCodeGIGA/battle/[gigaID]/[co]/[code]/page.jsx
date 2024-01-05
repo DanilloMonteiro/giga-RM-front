@@ -11,7 +11,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { SyncLoader } from "react-spinners";
 
-const socket = io("http://localhost:3003");
+const socket = io("http://localhost:3001");
 
 export default function Page({ params }) {
   const router = useRouter();
