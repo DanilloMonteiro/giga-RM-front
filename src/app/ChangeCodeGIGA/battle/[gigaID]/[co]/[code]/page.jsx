@@ -2,21 +2,20 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import Api from "../../../../../../services/api";
-import GigaServices from "../../../../../../services/giga";
+import { io } from "socket.io-client";
+import Api from "../../../../../../../services/api";
+import GigaServices from "../../../../../../../services/giga";
+import FunctionServices from "../../../../../../../services/function";
 import { X } from "@phosphor-icons/react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { SyncLoader } from "react-spinners";
 
+const socket = io("http://localhost:3003");
+
 export default function Page({ params }) {
   const router = useRouter();
 
-  const [fields, setFields] = useState([
-    ["LED", 1, 1232],
-    ["ENCLAVE", 1, 0],
-    ["CIRCUITO", 1, 0],
-  ]);
   const [addFieldScreen, setAddFieldScreen] = useState(false);
   const [pointType, setPointType] = useState("");
   const [giga, setGiga] = useState([]);
@@ -25,7 +24,8 @@ export default function Page({ params }) {
   const [looding, setLooding] = useState(true);
 
   async function fetchGIGA() {
-    const response = await GigaServices.findById("658dd6f47564a75d552f7cf3");
+    const response = await GigaServices.findById(params.gigaID);
+    await FunctionServices.holderTest(params.code, params.gigaID);
 
     if (response.statusText === "OK") {
       const giga = [response.data];
@@ -36,9 +36,9 @@ export default function Page({ params }) {
         (objeto) => objeto.name === params.co
       );
 
-      console.log(index);
+      console.log(giga[0].holder[330].points);
       setIndex(index);
-      setPoints([giga[0].holder[index].points]);
+      setPoints(giga[0].holder[330].points);
       setLooding(false);
     }
   }
@@ -114,6 +114,51 @@ export default function Page({ params }) {
     openAddFieldScreen();
   }
 
+  const Presence = (text) => {
+    if (
+      text.startsWith("TRAVA") ||
+      text.startsWith("ESTANQUEIDADE") ||
+      text.startsWith("GENERICO")
+    ) {
+      return true;
+    }
+
+    return false;
+  };
+
+  function TesteFunction(data) {
+    console.log(data);
+    if (points != []) {
+      if (data[0] == 1) {
+        setPoints((prevTeste) => {
+          let newTeste = { ...prevTeste };
+
+          newTeste[data[1]].status = "in";
+
+          return newTeste;
+        });
+      } else if (data[0] == 2) {
+        setPoints((prevTeste) => {
+          let newTeste = { ...prevTeste };
+
+          newTeste[data[1]].status = "out";
+
+          return newTeste;
+        });
+      }
+    }
+  }
+
+  useEffect(() => {
+    socket.on("modificacao", (data) => {
+      TesteFunction(data);
+    });
+
+    return () => {
+      socket.off("modificacao");
+    };
+  }, []);
+
   useEffect(() => {
     fetchGIGA();
   }, []);
@@ -136,7 +181,40 @@ export default function Page({ params }) {
                 />
               </div>
               <div className="flex w-full h-full gap-2">
-                <div className="flex flex-col gap-3 w-full h-[83vh] bg-slate-200 rounded-md px-3 py-2"></div>
+                <div className="flex flex-col w-full h-[83vh] bg-slate-200 rounded-md px-3 py-2">
+                  {points?.map((p, pindex) => (
+                    <>
+                      <div
+                        className={`flex w-1/2 justify-between ${
+                          pindex % 2 ? "bg-slate-300" : "bg-white"
+                        }`}
+                      >
+                        <div className="flex flex-row gap-1">
+                          <p>{p.type}</p>
+                          <p>{p.type_number}</p>
+                        </div>
+
+                        <div
+                          className={`flex flex-row w-[20%] px-3 justify-between ${
+                            p.status == "" || undefined ? "bg-red-300" : ""
+                          }`}
+                        >
+                          {Presence(p.type) === true && (
+                            <>
+                              <p>{p.number[1]}</p>
+                            </>
+                          )}
+                          {Presence(p.type) === false && (
+                            <>
+                              <p>{0}</p>
+                            </>
+                          )}
+                          <p>{p.number[0]}</p>
+                        </div>
+                      </div>
+                    </>
+                  ))}
+                </div>
               </div>
             </div>
           </div>

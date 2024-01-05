@@ -7,6 +7,7 @@ const FunctionServices = {
   aprove: () => Api.get("/aprove"),
   on: (status) => Api.get(`/on?status=${status}`),
   off: (status) => Api.get(`/off?status=${status}`),
+  holderTest: (id, id2) => Api.get(`/holderTest/${id}/${id2}`),
 };
 
 export default FunctionServices;

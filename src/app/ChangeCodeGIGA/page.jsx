@@ -78,7 +78,7 @@ export default function Home() {
                       className="flex w-full h-[40px] items-center text-lg px-2 bg-slate-100 justify-between"
                     >
                       <h1>{t.name}</h1>
-                      <Link href={`/ChangeCodeGIGA/battle`}>
+                      <Link href={`/ChangeCodeGIGA/battle/${t._id}`}>
                         <button className="bg-blue-400 text-white font-semibold w-[100px] h-[30px] border-[2px] border-blue-400 rounded-sm hover:text-blue-400 hover:bg-white">
                           Abrir
                         </button>

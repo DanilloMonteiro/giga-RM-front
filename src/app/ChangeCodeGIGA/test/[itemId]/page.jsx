@@ -132,7 +132,7 @@ export default function Page({ params }) {
     // Send the edited image data to the server
     try {
       console.log("Before fetch");
-      const response = await fetch("http://localhost:3003/uploads/test", {
+      const response = await fetch(`${port}/uploads/test`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

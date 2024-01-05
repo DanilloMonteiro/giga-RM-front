@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { X } from "@phosphor-icons/react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import GigaServices from "../../../../services/giga";
+import GigaServices from "../../../../../services/giga";
 import { SyncLoader } from "react-spinners";
 
 export default function Page({ params }) {
@@ -31,7 +31,7 @@ export default function Page({ params }) {
   );
 
   async function fetchGIGA() {
-    const response = await GigaServices.findById("658dd6f47564a75d552f7cf3");
+    const response = await GigaServices.findById(params.gigaID);
 
     if (response.statusText === "OK") {
       const giga = [response.data];
@@ -40,6 +40,18 @@ export default function Page({ params }) {
       setLooding(false);
     }
   }
+
+  const Presence = (text) => {
+    if (
+      text.startsWith("TRAVA") ||
+      text.startsWith("ESTANQUEIDADE") ||
+      text.startsWith("GENERICO")
+    ) {
+      return true;
+    }
+
+    return false;
+  };
 
   function openAddFieldScreen() {
     setAddFieldScreen(!addFieldScreen);
@@ -135,7 +147,7 @@ export default function Page({ params }) {
                             key={itemIndex}
                             onClick={() => {
                               router.push(
-                                `/ChangeCodeGIGA/battle/${item.name}`
+                                `/ChangeCodeGIGA/battle/${params.gigaID}/${item.name}`
                               );
                             }}
                             onMouseEnter={() =>
@@ -232,8 +244,9 @@ export default function Page({ params }) {
                             {h.type} {h.type_number}
                           </p>
                         </div>
-                        <div className="flex w-1/2 h-auto">
-                          <p>{h.number}</p>
+                        <div className="flex w-1/2 gap-14 h-auto">
+                          <p>{h.number[0]}</p>
+                          {Presence(h.type) == true && <p>{h.number[1]}</p>}
                         </div>
                       </div>
                     </div>

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { io } from "socket.io-client";
 import TestServices from "../../../../../services/test";
+import FunctionServices from "../../../../../services/function";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import GigaServices from "../../../../../services/giga";
@@ -29,7 +30,8 @@ export default function Home({ params }) {
       const responseTest = await TestServices.find(
         params.productCode,
         re,
-        update
+        update,
+        1
       );
 
       if (
@@ -48,11 +50,26 @@ export default function Home({ params }) {
             teste[0].outputs_c[i].c_name !== "" &&
             teste[0].outputs_c[i].c_name !== "empty"
           ) {
-            connectors.push(teste[0].outputs_c[i].c_name);
+            if (connectors.includes(teste[0].outputs_c[i].c_name)) {
+            } else {
+              connectors.push(teste[0].outputs_c[i].c_name);
+            }
           }
         }
 
-        console.log("aquii", teste[0]);
+        for (let i = 0; i < teste[0].inputs.length; i++) {
+          if (
+            teste[0].inputs_c[i].c_name !== "" &&
+            teste[0].inputs_c[i].c_name !== "empty"
+          ) {
+            if (connectors.includes(teste[0].inputs_c[i].c_name)) {
+            } else {
+              connectors.push(teste[0].inputs_c[i].c_name);
+            }
+          }
+        }
+
+        console.log("aquii", connectors);
 
         for (let i = 0; i < giga[0].holder.length; i++) {
           if (connectors.includes(giga[0].holder[i].name)) {
@@ -69,32 +86,41 @@ export default function Home({ params }) {
   }
 
   async function concluirBatalha() {
-    router.push(`/test/GIGAtest/${teste.product_code}`);
+    await FunctionServices.switch();
+    setTimeout(function () {
+      router.push(`/test/GIGAtest/${teste.product_code}`);
+    }, 1000);
   }
 
   function TesteFunction(data) {
     console.log(data);
-    if (teste != []) {
+    if (giga != [] && teste != []) {
       if (data[0] == 4) {
-        for (let i = 0; i < batalha.length; i++) {
-          if (batalha[i].co == data[2]) {
-            setBatalha((prevTeste) => {
-              const newTeste = [...prevTeste];
+        for (let i = 0; i < giga.holder.length; i++) {
+          if (giga.holder[i].name == data[2]) {
+            console.log("in");
+            setGiga((prevTeste) => {
+              const newTeste = { ...prevTeste };
 
-              newTeste[i].status = false;
+              console.log(newTeste);
+
+              newTeste.holder[i].status = "in";
+
+              console.log(newTeste.holder[i]);
 
               return newTeste;
             });
           }
         }
       } else if (data[0] == 5) {
-        for (let i = 0; i < batalha.length; i++) {
+        for (let i = 0; i < giga.holder.length; i++) {
           for (let j = 2; j < data.length; j++) {
-            if (batalha[i].co == data[j]) {
-              setBatalha((prevTeste) => {
-                const newTeste = [...prevTeste];
+            if (giga.holder[i].name == data[j]) {
+              console.log("out");
+              setGiga((prevTeste) => {
+                const newTeste = { ...prevTeste };
 
-                newTeste[i].status = true;
+                newTeste.holder[i].status = "in";
 
                 return newTeste;
               });
@@ -195,20 +221,18 @@ export default function Home({ params }) {
             </div>
             <div className="flex w-full h-2/4 bg-white">
               <div className="flex w-full h-full justify-start items-center border-[1px] border-slate-400 rounded-md overflow-x-auto whitespace-nowrap">
-                {batalha.map((i, index) => (
+                {giga?.holder?.map((i, index) => (
                   <>
                     <div
                       className={`flex min-w-[230px] h-full flex-col text-center ${
-                        i.status == false || i.status == null
-                          ? "hidden"
-                          : "flex"
+                        i.status == "in" || i.status == "" ? "hidden" : "flex"
                       } bg-slate-200 border-[2px] rounded-lg border-slate-600`}
                     >
                       <span className="flex justify-center my-4">
-                        Modulo {i.co} {`${i.status}`}
+                        Modulo {i.name}
                       </span>
                       <Image
-                        src={`/${i.c_src}`}
+                        src={`/default/${i.battle_src}`}
                         width={1000}
                         height={500}
                         alt="Picture of the author"

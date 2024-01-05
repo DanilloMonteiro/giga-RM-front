@@ -24,6 +24,7 @@ export default function Home({ params }) {
   const [test, setTest] = useState([]);
   const [maxItens, setMaxItens] = useState(0);
   const [time, setTime] = useState(new Date());
+  const [primeiro, setPrimeiro] = useState(false);
 
   //screen
   const [dialogTestPoints, setDialogTestPoints] = useState(false);
@@ -49,7 +50,12 @@ export default function Home({ params }) {
 
   async function fetchTest(testCode, re, update) {
     try {
-      const response = await TestServices.find(params.productCode, re, update);
+      const response = await TestServices.find(
+        params.productCode,
+        re,
+        update,
+        2
+      );
 
       console.log(response.data.status);
 
@@ -66,7 +72,7 @@ export default function Home({ params }) {
   }
 
   async function Reiniciar() {
-    // await FunctionServices.stop();
+    await FunctionServices.stop();
     router.push(`/test`);
     setCooldownButton(true);
     setTimeout(function () {
@@ -74,13 +80,32 @@ export default function Home({ params }) {
     }, 3000);
   }
 
+  const proximoLaco = () => {
+    setTest((prevTeste) => {
+      const newTeste = { ...prevTeste[0] }; // Clone o objeto teste[0]
+
+      // Use o método filter para criar novos arrays que excluem o elemento específico
+      newTeste.outputs = newTeste.outputs.filter((element, i) => i !== 0);
+      newTeste.outputs_desc = newTeste.outputs_desc.filter(
+        (element, i) => i !== 0
+      );
+      newTeste.outputs_c = newTeste.outputs_c.filter((element, i) => i !== 0);
+      newTeste.inputs = newTeste.inputs.filter((element, i) => i !== 0);
+      newTeste.inputs_desc = newTeste.inputs_desc.filter(
+        (element, i) => i !== 0
+      );
+      newTeste.inputs_c = newTeste.inputs_c.filter((element, i) => i !== 0);
+      return [newTeste];
+    });
+  };
+
   const progress =
     test.length === 0
       ? 100
       : ((maxItens - test[0].outputs.length) / maxItens) * 100; // Defina MAX_ITEMS como o tamanho máximo do array
 
   function TestFunction(data) {
-    console.log(data);
+    //console.log(data);
     if (test != []) {
       if (data[0] == 0) {
         // for (let i = 1; i < data.length; i++) {
@@ -169,12 +194,21 @@ export default function Home({ params }) {
           return newTest;
         });
 
-        setLED((prevTeste) => {
-          let newTest = prevTeste; // Clone o objeto teste[0]
+        // setLED((prevTeste) => {
+        //   let newTest = prevTeste; // Clone o objeto teste[0]
 
-          newTest = data[2];
+        //   newTest = data[2];
 
-          return newTest;
+        //   return newTest;
+        // });
+      } else if (data[0] == 9) {
+        console.log(data);
+        setPrimeiro((prevTeste) => {
+          let newTeste = prevTeste; // Clone o objeto teste[0]
+
+          newTeste = true;
+
+          return newTeste;
         });
       }
     } else {
@@ -267,8 +301,12 @@ export default function Home({ params }) {
                               key={innerDescIndex}
                               className={`grid grid-cols-6 ${
                                 innerDescIndex % 2 === 0
-                                  ? "bg-slate-200"
+                                  ? "bg-slate-2 00"
                                   : "bg-slate-300"
+                              } ${
+                                primeiro == true && innerDescIndex == 0
+                                  ? "bg-orange-300 text-2xl font-bold"
+                                  : " "
                               }`}
                             >
                               <div className="col-span-2 ml-2">
@@ -309,7 +347,10 @@ export default function Home({ params }) {
                   </div>
                   <div className="flex flex-col py-2 mt-auto gap-2 items-center bg-slate-400 rounded-xl">
                     <div className="flex gap-2">
-                      <button className="w-[150px] h-[80px] sm:w-[80px] sm:text-sm rounded-md text-2xl bg-green-400 hover:bg-white hover:text-green-400 text-white font-bold border-[2px] border-green-400">
+                      <button
+                        onClick={() => proximoLaco()}
+                        className="w-[150px] h-[80px] sm:w-[80px] sm:text-sm rounded-md text-2xl bg-green-400 hover:bg-white hover:text-green-400 text-white font-bold border-[2px] border-green-400"
+                      >
                         Aprovar chicote
                       </button>
                       <button className="w-[150px] h-[80px] sm:w-[80px] sm:text-sm rounded-md text-2xl bg-red-400 hover:bg-white hover:text-red-400 text-white font-bold border-[2px] border-red-400">
@@ -341,25 +382,35 @@ export default function Home({ params }) {
                 <div className="flex flex-col w-full h-full justify-center items-center bg-slate-200">
                   <div className="flex w-full h-full bg-white">
                     <div className="flex w-1/2 h-full justify-center items-center border-[1px] border-slate-400 rounded-md">
-                      {t.outputs_c[0].c_src && (
+                      {test[0].outputs_c[0]?.c_src && primeiro == true && (
                         <>
-                          <Image
-                            src={`/${t.outputs_c[0].c_src}`}
-                            width={400}
-                            height={400}
-                            alt="Picture of the author"
-                          />
+                          <div className="h-full bg-orange-300 px-2 pb-1">
+                            <div className="flex w-full h-auto justify-center text-center text-3xl font-bold">
+                              {`${test[0].outputs_c[0].c_name}`}
+                            </div>
+                            <Image
+                              src={`/default/${test[0].outputs_c[0].c_src}`}
+                              width={290}
+                              height={290}
+                              alt="Picture of the author"
+                            />
+                          </div>
                         </>
                       )}
                     </div>
                     <div className="flex w-1/2 h-full justify-center items-center border-[1px] border-slate-400 rounded-md">
-                      {t.inputs_c[0].c_src && (
-                        <Image
-                          src={`/${t.inputs_c[0].c_src}`}
-                          width={400}
-                          height={400}
-                          alt="Picture of the author"
-                        />
+                      {test[0].inputs_c[0]?.c_src && primeiro == true && (
+                        <div className="h-full bg-orange-300 px-2 pb-1">
+                          <div className="flex w-full h-auto justify-center text-center text-3xl font-bold">
+                            {`${test[0].inputs_c[0].c_name}`}
+                          </div>
+                          <Image
+                            src={`/default/${test[0].inputs_c[0].c_src}`}
+                            width={290}
+                            height={290}
+                            alt="Picture of the author"
+                          />
+                        </div>
                       )}
                     </div>
                   </div>
