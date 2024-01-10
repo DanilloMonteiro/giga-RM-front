@@ -121,11 +121,11 @@ export default function Home() {
               </div>
 
               <div className="flex justify-between mt-6">
-                <button className="bg-blue-400 text-white font-semibold w-[200px] h-[40px] rounded-sm border-[2px] border-blue-400 hover:text-blue-400 hover:bg-white">
+                <button className="bg-blue-400 text-white font-semibold w-[210px] h-[40px] rounded-sm border-[2px] border-blue-400 hover:text-blue-400 hover:bg-white">
                   <Link href={`/ChangeCodeGIGA`}>Configurações da mesa</Link>
                 </button>
-                <button className="bg-blue-400 text-white font-semibold w-[200px] h-[40px] rounded-sm border-[2px] border-blue-400 hover:text-blue-400 hover:bg-white">
-                  <Link href={`/pontos`}>Descobrir pontos</Link>
+                <button className="bg-blue-400 text-white font-semibold w-[210px] h-[40px] rounded-sm border-[2px] border-blue-400 hover:text-blue-400 hover:bg-white">
+                  <Link href={`/BoardConfig`}>Configuração das placas</Link>
                 </button>
               </div>
             </div>

@@ -13,11 +13,6 @@ import TestServices from "../../../../../../services/test";
 export default function Page({ params }) {
   const router = useRouter();
 
-  const [fields, setFields] = useState([
-    ["LED", 1, 1232],
-    ["ENCLAVE", 1, 0],
-    ["CIRCUITO", 1, 0],
-  ]);
   const [addFieldScreen, setAddFieldScreen] = useState(false);
   const [pointType, setPointType] = useState("");
   const [giga, setGiga] = useState([]);
@@ -46,7 +41,7 @@ export default function Page({ params }) {
   }
 
   function Back() {
-    router.push(`/ChangeCodeGIGA/battle`);
+    router.push(`/ChangeCodeGIGA/battle/${params.gigaID}`);
   }
 
   const handleSave = async () => {

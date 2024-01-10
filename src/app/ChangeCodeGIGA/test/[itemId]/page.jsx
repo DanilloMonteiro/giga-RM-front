@@ -88,6 +88,15 @@ export default function Page({ params }) {
       .catch((error) => {
         console.error(`Erro ao atualizar o item no banco de dados:`, error);
       });
+
+    await TestServices.loadTest(test[0]._id)
+      .then((response) => {
+        fetchTest();
+        console.log("Atualizacao de item no MongoDB feita com sucesso");
+      })
+      .catch((error) => {
+        console.error(`Erro ao atualizar o item no banco de dados:`, error);
+      });
   };
 
   async function fetchTest() {
@@ -179,9 +188,9 @@ export default function Page({ params }) {
     const { image } = canvasStateRef.current;
 
     if (actualURL == undefined) {
-      image.src = `http://172.29.14.151:3000/default/semimagem.png`;
+      image.src = `http://localhost:3002/default/semimagem.png`;
     } else {
-      image.src = `http://172.29.14.151:3000/default/${actualURL}`;
+      image.src = `http://localhost:3002/default/${actualURL}`;
     }
 
     image.onload = function () {

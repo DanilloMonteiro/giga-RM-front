@@ -44,7 +44,7 @@ export default function Page({ params }) {
   }
 
   function Back() {
-    router.push(`/ChangeCodeGIGA/battle`);
+    router.push(`/ChangeCodeGIGA/battle/${params.gigaID}/${params.co}`);
   }
 
   const handleUpload = async (event, type, idConector) => {
@@ -170,7 +170,7 @@ export default function Page({ params }) {
           <div className="flex flex-col static w-[97vw] h-[95vh] bg-white rounded-xl drop-shadow-lg px-5 py-3">
             <div className="flex flex-col w-full gap-4 h-full">
               <div className="flex w-full h-auto">
-                <h1 className="text-3xl font-semibold">{`Teste de holder`}</h1>
+                <h1 className="text-3xl font-semibold">{`Teste de modulo`}</h1>
                 <X
                   size={36}
                   weight="bold"
@@ -185,7 +185,7 @@ export default function Page({ params }) {
                   {points?.map((p, pindex) => (
                     <>
                       <div
-                        className={`flex w-1/2 justify-between ${
+                        className={`flex w-1/2 justify-between pl-2 ${
                           pindex % 2 ? "bg-slate-300" : "bg-white"
                         }`}
                       >

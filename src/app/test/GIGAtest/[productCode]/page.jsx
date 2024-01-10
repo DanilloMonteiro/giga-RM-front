@@ -10,7 +10,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import FunctionServices from "../../../../../services/function";
 
-const socket = io("http://localhost:3003");
+const socket = io("http://localhost:3001");
 
 export default function Home({ params }) {
   const router = useRouter();
@@ -68,6 +68,45 @@ export default function Home({ params }) {
       }
     } catch (error) {
       console.error("Erro ao buscar dados do teste:", error);
+    }
+  }
+
+  const incrementReprovados = () => {
+    setReprove(reprove + 1);
+  };
+
+  const incrementAprovados = () => {
+    setAprove(aprove + 1);
+  };
+
+  async function Reprovar() {
+    try {
+      incrementReprovados();
+
+      await FunctionServices.reprove();
+
+      setScreenReprove(true);
+    } catch (error) {
+      console.error("Erro ao iniciar teste:", error);
+      // Define carregado como false em caso de erro
+    }
+  }
+
+  async function Aprovar() {
+    try {
+      incrementAprovados();
+
+      await TestServices.aprove();
+
+      setScreenAprove(true);
+
+      setTimeout(() => {
+        setScreenAprove(false);
+        Reiniciar();
+      }, 3000);
+    } catch (error) {
+      console.error("Erro ao iniciar teste:", error);
+      // Define carregado como false em caso de erro
     }
   }
 
@@ -210,6 +249,9 @@ export default function Home({ params }) {
 
           return newTeste;
         });
+      } else if (data[0] == 10) {
+        Reiniciar();
+        setScreenReprove(false);
       }
     } else {
     }
@@ -348,16 +390,14 @@ export default function Home({ params }) {
                   <div className="flex flex-col py-2 mt-auto gap-2 items-center bg-slate-400 rounded-xl">
                     <div className="flex gap-2">
                       <button
-                        onClick={() => proximoLaco()}
-                        className="w-[150px] h-[80px] sm:w-[80px] sm:text-sm rounded-md text-2xl bg-green-400 hover:bg-white hover:text-green-400 text-white font-bold border-[2px] border-green-400"
+                        onClick={() => {
+                          Reprovar();
+                        }}
+                        className="w-[150px] h-[80px] sm:w-[80px] sm:text-sm rounded-md text-2xl bg-red-400 hover:bg-white hover:text-red-400 text-white font-bold border-[2px] border-red-400"
                       >
-                        Aprovar chicote
-                      </button>
-                      <button className="w-[150px] h-[80px] sm:w-[80px] sm:text-sm rounded-md text-2xl bg-red-400 hover:bg-white hover:text-red-400 text-white font-bold border-[2px] border-red-400">
                         Reprovar chicote
                       </button>
-                    </div>
-                    <div className="flex gap-2">
+
                       <button
                         onClick={() => {
                           Reiniciar();
@@ -370,9 +410,6 @@ export default function Home({ params }) {
                         disabled={cooldownButton}
                       >
                         Setup
-                      </button>
-                      <button className="w-[150px] h-[80px] sm:w-[80px] sm:text-sm rounded-md text-2xl bg-blue-400 hover:bg-white hover:text-blue-400 text-white font-bold border-[2px] border-blue-400">
-                        Teste de pontos
                       </button>
                     </div>
                   </div>
@@ -417,15 +454,15 @@ export default function Home({ params }) {
                 </div>
               </div>
               {screenAprove == true && (
-                <div className="flex flex-col items-center justify-center absolute w-full h-full bg-green-500 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-xl">
+                <div className="flex flex-col items-center justify-center z-20 absolute w-full h-full bg-green-500 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-xl">
                   <CheckCircle size={300} className="text-white" />
-                  <h1 className="text-white text-9xl">Cabo Aprovado</h1>
+                  <h1 className="text-white text-9xl">Chicote Aprovado</h1>
                 </div>
               )}
               {screenReprove == true && (
-                <div className="flex flex-col items-center justify-center absolute w-full h-full bg-red-500 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-xl">
+                <div className="flex flex-col items-center justify-center z-20 absolute w-full h-full bg-red-500 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-xl">
                   <WarningCircle size={300} className="text-white" />
-                  <h1 className="text-white text-9xl">Cabo Reprovado</h1>
+                  <h1 className="text-white text-9xl">Chicote Reprovado</h1>
                 </div>
               )}
             </div>

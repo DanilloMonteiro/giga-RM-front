@@ -16,6 +16,7 @@ export default function Home({ params }) {
 
   const [teste, setTeste] = useState([]);
   const [giga, setGiga] = useState([]);
+  const [cooldownButton, setCooldownButton] = useState(false);
 
   const letras = ["A", "B", "C", "D", "E", "F", "G"];
   const numColunas = 116;
@@ -85,11 +86,17 @@ export default function Home({ params }) {
     } catch (error) {}
   }
 
-  async function concluirBatalha() {
-    await FunctionServices.switch();
+  async function Setup() {
+    router.push(`/test`);
+    setCooldownButton(true);
     setTimeout(function () {
-      router.push(`/test/GIGAtest/${teste.product_code}`);
-    }, 1000);
+      setCooldownButton(false);
+    }, 3000);
+  }
+
+  async function Reprovar() {
+    await FunctionServices.reprove();
+    router.push(`/test`);
   }
 
   function TesteFunction(data) {
@@ -152,6 +159,36 @@ export default function Home({ params }) {
     { length: numLinhas * numColunas },
     (_, index) => index + 1
   );
+
+  async function Reiniciar() {
+    await FunctionServices.stopBatalha();
+    router.push(`/test`);
+    setCooldownButton(true);
+    setTimeout(function () {
+      setCooldownButton(false);
+    }, 3000);
+  }
+
+  function TestFunction(data) {
+    //console.log(data);
+    if (giga != []) {
+      if (data[0] == 10) {
+        Reiniciar();
+        setScreenReprove(false);
+      }
+    } else {
+    }
+  }
+
+  useEffect(() => {
+    socket.on("modificacao", (data) => {
+      TestFunction(data);
+    });
+
+    return () => {
+      socket.off("modificacao");
+    };
+  }, [giga]);
 
   useEffect(() => {
     socket.on("modificacao", (data) => {
@@ -240,13 +277,28 @@ export default function Home({ params }) {
                     </div>
                   </>
                 ))}
+              </div>
+              <div className="flex flex-col justify-center gap-10 items-center rounded-lg border-[2px] border-slate-500 bg-slate-300 h-[271px] w-[200px]">
                 <button
-                  className="bg-slate-200"
+                  className={`w-[150px] h-[80px] sm:w-[80px] sm:text-sm rounded-md text-2xl  font-bold border-[2px] ${
+                    cooldownButton == true
+                      ? "bg-slate-500 border-slate-500 text-white"
+                      : " bg-blue-400 hover:bg-white hover:text-blue-400 text-white border-blue-400 "
+                  }`}
+                  disabled={cooldownButton}
                   onClick={() => {
-                    concluirBatalha();
+                    Setup();
                   }}
                 >
-                  Concluir batalha
+                  Setup
+                </button>
+                <button
+                  className="w-[150px] h-[80px] sm:w-[80px] sm:text-sm rounded-md text-2xl bg-red-400 hover:bg-white hover:text-red-400 text-white font-bold border-[2px] border-red-400"
+                  onClick={() => {
+                    Reprovar();
+                  }}
+                >
+                  Reprovar
                 </button>
               </div>
             </div>
