@@ -21,8 +21,6 @@ export default function Home({ params }) {
   const letras = ["A", "B", "C", "D", "E", "F", "G"];
   const numColunas = 116;
 
-  const [batalha, setBatalha] = useState([]);
-
   async function fetchTest(testeCode, re, update) {
     try {
       const responseGiga = await GigaServices.findById(
@@ -35,6 +33,8 @@ export default function Home({ params }) {
         1
       );
 
+      console.log(responseTest, responseGiga)
+
       if (
         responseTest.statusText === "OK" &&
         responseGiga.statusText === "OK"
@@ -45,8 +45,10 @@ export default function Home({ params }) {
         setTeste(...teste);
 
         let connectors = [];
+        console.log("aquii", teste[0])
 
-        for (let i = 0; i < teste[0].outputs.length; i++) {
+        for (let i = 0; i < teste[0].outputs_c.length; i++) {
+          console.log("aqui 2")
           if (
             teste[0].outputs_c[i].c_name !== "" &&
             teste[0].outputs_c[i].c_name !== "empty"
@@ -57,8 +59,9 @@ export default function Home({ params }) {
             }
           }
         }
+        console.log("aquii")
 
-        for (let i = 0; i < teste[0].inputs.length; i++) {
+        for (let i = 0; i < teste[0].inputs_c.length; i++) {
           if (
             teste[0].inputs_c[i].c_name !== "" &&
             teste[0].inputs_c[i].c_name !== "empty"
@@ -69,7 +72,7 @@ export default function Home({ params }) {
             }
           }
         }
-
+        
         console.log("aquii", connectors);
 
         for (let i = 0; i < giga[0].holder.length; i++) {
@@ -87,6 +90,7 @@ export default function Home({ params }) {
   }
 
   async function Setup() {
+    await FunctionServices.stopBatalha();
     router.push(`/test`);
     setCooldownButton(true);
     setTimeout(function () {
@@ -103,53 +107,50 @@ export default function Home({ params }) {
     console.log(data);
     if (giga != [] && teste != []) {
       if (data[0] == 4) {
-        for (let i = 0; i < giga.holder.length; i++) {
+        for (let i = 0; i < giga?.holder?.length; i++) {
           if (giga.holder[i].name == data[2]) {
-            console.log("in");
+            let todasTravasTrue = false
             setGiga((prevTeste) => {
               const newTeste = { ...prevTeste };
 
-              console.log(newTeste);
+              todasTravasTrue = newTeste.holder.every(objeto => {
+                if ( objeto.status !== "out") {
+                 return true
+                } else {
+             
+                 return false
+                }
+               });
+
+               if (todasTravasTrue == true) {
+                concluirBatalha()
+              }
 
               newTeste.holder[i].status = "in";
-
-              console.log(newTeste.holder[i]);
 
               return newTeste;
             });
           }
         }
+
+    
       } else if (data[0] == 5) {
-        for (let i = 0; i < giga.holder.length; i++) {
+        for (let i = 0; i < giga?.holder?.length; i++) {
           for (let j = 2; j < data.length; j++) {
             if (giga.holder[i].name == data[j]) {
-              console.log("out");
               setGiga((prevTeste) => {
                 const newTeste = { ...prevTeste };
 
-                newTeste.holder[i].status = "in";
+                newTeste.holder[i].status = "out";
 
                 return newTeste;
               });
             }
           }
         }
-      } else if (data[0] == 6) {
-        setENCLAVE((prevTeste) => {
-          let newTeste = prevTeste;
-
-          newTeste = data[1];
-
-          return newTeste;
-        });
-
-        setLED((prevTeste) => {
-          let newTeste = prevTeste;
-
-          newTeste = data[2];
-
-          return newTeste;
-        });
+      } else if (data[0] == 10) {
+        Reiniciar();
+        setScreenReprove(false);
       }
     }
   }
@@ -169,26 +170,12 @@ export default function Home({ params }) {
     }, 3000);
   }
 
-  function TestFunction(data) {
-    //console.log(data);
-    if (giga != []) {
-      if (data[0] == 10) {
-        Reiniciar();
-        setScreenReprove(false);
-      }
-    } else {
-    }
+  async function concluirBatalha() {
+    await FunctionServices.switch();
+    setTimeout(function () {
+      router.push(`/test/GIGAtest/${teste.product_code}`);
+    }, 1000);
   }
-
-  useEffect(() => {
-    socket.on("modificacao", (data) => {
-      TestFunction(data);
-    });
-
-    return () => {
-      socket.off("modificacao");
-    };
-  }, [giga]);
 
   useEffect(() => {
     socket.on("modificacao", (data) => {
@@ -261,7 +248,7 @@ export default function Home({ params }) {
                 {giga?.holder?.map((i, index) => (
                   <>
                     <div
-                      className={`flex min-w-[230px] h-full flex-col text-center ${
+                      className={`flex min-w-[230px] max-w-[250px] h-full flex-col text-center ${
                         i.status == "in" || i.status == "" ? "hidden" : "flex"
                       } bg-slate-200 border-[2px] rounded-lg border-slate-600`}
                     >
@@ -295,7 +282,7 @@ export default function Home({ params }) {
                 <button
                   className="w-[150px] h-[80px] sm:w-[80px] sm:text-sm rounded-md text-2xl bg-red-400 hover:bg-white hover:text-red-400 text-white font-bold border-[2px] border-red-400"
                   onClick={() => {
-                    Reprovar();
+                    concluirBatalha();
                   }}
                 >
                   Reprovar

@@ -2,9 +2,15 @@
 
 import { useEffect, useState } from "react";
 import TesteServices from "../../../services/test";
+import { io } from "socket.io-client";
+import FunctionServices from "../../../services/function";
+
+const socket = io("http://localhost:3003");
 
 export default function Home() {
   const [pontos1, setPontos1] = useState([]);
+  const [LED, setLED] = useState("")
+  const [ENCLAVE, setENCLAVE] = useState("")
 
   function Carregar() {
     let pontos = [];
@@ -14,6 +20,10 @@ export default function Home() {
     }
 
     setPontos1(pontos);
+  }
+
+  async function startLoop() {
+    await FunctionServices.startLoop()
   }
 
   async function Mudar1(index) {
@@ -38,6 +48,38 @@ export default function Home() {
     });
   }
 
+  function TesteFunction(data) {
+     console.log(data);
+   
+    if (data[0] == 6) {
+      setENCLAVE((prevTeste) => {
+        let newTeste = prevTeste // Clone o objeto teste[0]
+
+        newTeste = data[1]
+
+        return newTeste;
+      });
+
+      setLED((prevTeste) => {
+        let newTeste = prevTeste // Clone o objeto teste[0]
+
+        newTeste = data[2]
+
+        return newTeste;
+      });
+    }
+  }
+
+  useEffect(() => {
+    socket.on("modificacao", (data) => {
+      TesteFunction(data);
+    });
+
+    return () => {
+      socket.off("modificacao");
+    };
+  }, [LED]);
+
   useEffect(() => {
     Carregar();
   }, []);
@@ -47,6 +89,11 @@ export default function Home() {
       <div className="flex w-full h-full">
         <div className="flex w-screen h-screen bg-blue-400 justify-center items-center">
           <div className="flex flex-col static w-[95vw] h-[95vh] bg-white rounded-xl drop-shadow-lg px-7 py-3">
+              <div className="flex">
+                <label>ENCLAVE</label><input value={ENCLAVE}></input>
+                <label>LED</label><input value={LED}></input>
+                <button onClick={() => { startLoop() }}>Start loop</button>
+              </div>
             <div className="flex flex-wrap overflow-x-auto">
               {pontos1.map((p, index) => (
                 <>

@@ -36,14 +36,17 @@ export default function Page({ params }) {
         (objeto) => objeto.name === params.co
       );
 
-      console.log(giga[0].holder[330].points);
+      console.log(index)
+
+      console.log(giga[0].holder[index].points);
       setIndex(index);
-      setPoints(giga[0].holder[330].points);
+      setPoints(giga[0].holder[index].points);
       setLooding(false);
     }
   }
 
-  function Back() {
+  async function Back() {
+    await FunctionServices.stopHolder()
     router.push(`/ChangeCodeGIGA/battle/${params.gigaID}/${params.co}`);
   }
 
@@ -127,21 +130,23 @@ export default function Page({ params }) {
   };
 
   function TesteFunction(data) {
-    console.log(data);
+   
     if (points != []) {
       if (data[0] == 1) {
+        console.log(data);
         setPoints((prevTeste) => {
-          let newTeste = { ...prevTeste };
+          let newTeste = [ ...prevTeste ];
 
           newTeste[data[1]].status = "in";
 
           return newTeste;
         });
       } else if (data[0] == 2) {
+        console.log(data);
         setPoints((prevTeste) => {
-          let newTeste = { ...prevTeste };
+          let newTeste =  [ ...prevTeste ];
 
-          newTeste[data[1]].status = "out";
+          newTeste[data[1]].status = "";
 
           return newTeste;
         });
@@ -151,7 +156,9 @@ export default function Page({ params }) {
 
   useEffect(() => {
     socket.on("modificacao", (data) => {
-      TesteFunction(data);
+      if (points) {
+        TesteFunction(data);
+      }
     });
 
     return () => {
@@ -170,7 +177,7 @@ export default function Page({ params }) {
           <div className="flex flex-col static w-[97vw] h-[95vh] bg-white rounded-xl drop-shadow-lg px-5 py-3">
             <div className="flex flex-col w-full gap-4 h-full">
               <div className="flex w-full h-auto">
-                <h1 className="text-3xl font-semibold">{`Teste de modulo`}</h1>
+                <h1 className="text-3xl font-semibold">{`Teste de holder`}</h1>
                 <X
                   size={36}
                   weight="bold"
@@ -185,7 +192,7 @@ export default function Page({ params }) {
                   {points?.map((p, pindex) => (
                     <>
                       <div
-                        className={`flex w-1/2 justify-between pl-2 ${
+                        className={`flex w-1/2 justify-between ${
                           pindex % 2 ? "bg-slate-300" : "bg-white"
                         }`}
                       >
@@ -196,7 +203,9 @@ export default function Page({ params }) {
 
                         <div
                           className={`flex flex-row w-[20%] px-3 justify-between ${
-                            p.status == "" || undefined ? "bg-red-300" : ""
+                            p.status == "" || undefined ? "bg-red-300" : "bg-green-300"
+                          } ${
+                           p.type.startsWith("LED") ? "bg-yellow-300" : ""
                           }`}
                         >
                           {Presence(p.type) === true && (

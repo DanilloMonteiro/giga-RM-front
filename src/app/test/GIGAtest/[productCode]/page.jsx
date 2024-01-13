@@ -1,4 +1,4 @@
-"use client";
+'use client'
 
 import { useEffect, useState } from "react";
 import { io } from "socket.io-client";
@@ -10,7 +10,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import FunctionServices from "../../../../../services/function";
 
-const socket = io("http://localhost:3001");
+const socket = io("http://localhost:3003");
 
 export default function Home({ params }) {
   const router = useRouter();
@@ -30,6 +30,8 @@ export default function Home({ params }) {
   const [dialogTestPoints, setDialogTestPoints] = useState(false);
   const [screenReprove, setScreenReprove] = useState(false);
   const [screenAprove, setScreenAprove] = useState(false);
+
+  const [testeCopia, setTestCopia] = useState([])
 
   let test1 = [];
 
@@ -62,6 +64,7 @@ export default function Home({ params }) {
       if (response.data.status === "ok") {
         test1 = [response.data.teste];
 
+        setTestCopia(...[test1])
         setTest(...[test1]);
 
         setMaxItens(test1[0].outputs.length);
@@ -83,7 +86,7 @@ export default function Home({ params }) {
     try {
       incrementReprovados();
 
-      await FunctionServices.reprove();
+      await FunctionServices.reprove(test[0]._id);
 
       setScreenReprove(true);
     } catch (error) {
@@ -94,16 +97,18 @@ export default function Home({ params }) {
 
   async function Aprovar() {
     try {
-      incrementAprovados();
+      // incrementAprovados();
 
-      await TestServices.aprove();
+      setTest(...[testeCopia]);
+
+      const rerer = await FunctionServices.aprove(test[0]._id);
 
       setScreenAprove(true);
 
-      setTimeout(() => {
+       setTimeout(() => {
         setScreenAprove(false);
         Reiniciar();
-      }, 3000);
+       }, 3000);
     } catch (error) {
       console.error("Erro ao iniciar teste:", error);
       // Define carregado como false em caso de erro
@@ -315,7 +320,7 @@ export default function Home({ params }) {
                   <div>
                     <div className="flex w-full justify-center text-lg font-semibold">
                       {progress === 0 && "Aguardando Teste"}
-                      {progress === 100 && "Teste Concluído"}
+                      {progress === 100 && "Teste Concluído" && Aprovar()}
                       {progress !== 0 &&
                         progress !== 100 &&
                         `${progress.toFixed(2)}%`}
