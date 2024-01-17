@@ -7,6 +7,7 @@ import FunctionServices from "../../../../../services/function";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import GigaServices from "../../../../../services/giga";
+import { WarningCircle } from "@phosphor-icons/react/dist/ssr/WarningCircle";
 
 const socket = io("http://localhost:3003");
 
@@ -16,7 +17,8 @@ export default function Home({ params }) {
 
   const [teste, setTeste] = useState([]);
   const [giga, setGiga] = useState([]);
-  const [cooldownButton, setCooldownButton] = useState(false);
+  const [cooldownButton, setCooldownButton] = useState(true);
+  const [COMerror ,setCOMerror] = useState(false)
 
   const letras = ["A", "B", "C", "D", "E", "F", "G"];
   const numColunas = 116;
@@ -29,7 +31,6 @@ export default function Home({ params }) {
       const responseTest = await TestServices.find(
         params.productCode,
         re,
-        update,
         1
       );
 
@@ -151,6 +152,9 @@ export default function Home({ params }) {
       } else if (data[0] == 10) {
         Reiniciar();
         setScreenReprove(false);
+      } else if (data[0] == 12) {
+        setCOMerror(true)
+        setTimeout(() => {Reiniciar()}, 4000) 
       }
     }
   }
@@ -189,6 +193,8 @@ export default function Home({ params }) {
 
   useEffect(() => {
     fetchTest();
+
+    setTimeout(() => { setCooldownButton(false)}, 3000)
   }, []);
 
   return (
@@ -280,7 +286,12 @@ export default function Home({ params }) {
                   Setup
                 </button>
                 <button
-                  className="w-[150px] h-[80px] sm:w-[80px] sm:text-sm rounded-md text-2xl bg-red-400 hover:bg-white hover:text-red-400 text-white font-bold border-[2px] border-red-400"
+                  className={`-[150px] h-[80px] sm:w-[80px] sm:text-sm rounded-md text-2xl text-white font-bold border-[2px] border-red-400 ${
+                    cooldownButton == true
+                      ? "bg-slate-500 border-slate-500 text-white"
+                      : "bg-red-400 hover:bg-white hover:text-red-400 text-white border-red-400 "
+                  }`}
+                  disabled={cooldownButton}
                   onClick={() => {
                     concluirBatalha();
                   }}
@@ -291,6 +302,13 @@ export default function Home({ params }) {
             </div>
           </div>
         </div>
+        {COMerror && (
+           <div className="flex flex-col items-center justify-center z-20 absolute w-2/3 h-2/3 bg-red-500 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-xl">
+           <WarningCircle size={190} className="text-white" />
+           <h1 className="text-white text-7xl">Erro na porta COM</h1>
+         </div>
+        )}
+       
       </div>
     </div>
   );

@@ -55,13 +55,12 @@ export default function Home({ params }) {
       const response = await TestServices.find(
         params.productCode,
         re,
-        update,
         2
       );
 
       console.log(response.data.status);
 
-      if (response.data.status === "ok") {
+      if (response.data.status === "ok" || response.data.status === "find") {
         test1 = [response.data.teste];
 
         setTestCopia(...[test1])

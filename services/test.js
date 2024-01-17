@@ -2,9 +2,9 @@ import Api from "./api";
 
 const TestServices = {
   index: () => Api.get("/test"),
-  find: (codeTeste, RE, update, func) =>
+  find: (codeTeste, RE, func) =>
     Api.get(
-      `/test/upload?teste=${codeTeste}&RE=${RE}&update=${update}&func=${func}`
+      `/test/upload?product_code=${codeTeste}&RE=${RE}&func=${func}`
     ),
   findById: (id, params) => Api.get(`/test/${id}`, params),
   update: (id, params) => Api.put(`/test/${id}`, params),
